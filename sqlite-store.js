@@ -152,23 +152,12 @@ export class SQLiteStore {
     await fs.mkdir(path.dirname(this.dbPath), { recursive: true });
     await fs.mkdir(this.uploadDir, { recursive: true });
 
-    if (this.seedDbPath && path.resolve(this.seedDbPath) !== path.resolve(this.dbPath)) {
+    const shouldBootstrapFromSeed = await this.shouldBootstrapFromSeed();
+    if (shouldBootstrapFromSeed) {
       try {
-        const targetStats = await fs.stat(this.dbPath);
-        const seedStats = await fs.stat(this.seedDbPath);
-        if (targetStats.size === 0 && seedStats.size > 0) {
-          await copySqliteBundle(this.seedDbPath, this.dbPath);
-        }
+        await copySqliteBundle(this.seedDbPath, this.dbPath);
       } catch {
-        try {
-          await fs.access(this.dbPath);
-        } catch {
-          try {
-            await copySqliteBundle(this.seedDbPath, this.dbPath);
-          } catch {
-            // Fall back to schema creation below if the seed DB is unavailable.
-          }
-        }
+        // Fall back to schema creation below if the seed DB is unavailable.
       }
     }
 
@@ -183,6 +172,42 @@ export class SQLiteStore {
 
     if (needsBootstrap) {
       this.seedBaseData();
+    }
+  }
+
+  async shouldBootstrapFromSeed() {
+    if (!this.seedDbPath || path.resolve(this.seedDbPath) === path.resolve(this.dbPath)) {
+      return false;
+    }
+
+    try {
+      const seedDb = new Database(this.seedDbPath, { readonly: true, fileMustExist: true });
+      const seedCounts = {
+        products: seedDb.prepare('select count(*) as count from products').get().count,
+        users: seedDb.prepare('select count(*) as count from users').get().count,
+        profiles: seedDb.prepare('select count(*) as count from profiles').get().count
+      };
+      seedDb.close();
+
+      if (seedCounts.products === 0 && seedCounts.users === 0 && seedCounts.profiles === 0) {
+        return false;
+      }
+
+      try {
+        const targetDb = new Database(this.dbPath, { readonly: true });
+        const targetCounts = {
+          products: targetDb.prepare('select count(*) as count from products').get().count,
+          users: targetDb.prepare('select count(*) as count from users').get().count,
+          profiles: targetDb.prepare('select count(*) as count from profiles').get().count
+        };
+        targetDb.close();
+
+        return targetCounts.products === 0 && targetCounts.users === 0 && targetCounts.profiles === 0;
+      } catch {
+        return true;
+      }
+    } catch {
+      return false;
     }
   }
 
