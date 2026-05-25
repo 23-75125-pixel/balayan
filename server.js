@@ -332,7 +332,8 @@ app.use((error, _req, res, _next) => {
 await store.init();
 
 const server = app.listen(PORT, () => {
-  console.log(`Balayan Smashers Hub running on http://localhost:${PORT}`);
+  const publicUrl = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
+  console.log(`Balayan Smashers Hub running on ${publicUrl}`);
 });
 
 server.on('error', error => {
