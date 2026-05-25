@@ -4397,6 +4397,7 @@ async function saveCustomerFavoritesToDatabase() {
 async function handleCheckoutClick(e) {
     e.preventDefault();
     const btn = e.currentTarget;
+    const checkoutScope = getCheckoutScope(btn);
     loadCartFromStorageOnly();
     updateUI();
 
@@ -4406,44 +4407,76 @@ async function handleCheckoutClick(e) {
 
     setButtonLoading(btn, true, 'Checking...');
     try {
-        await proceedCheckout();
+        await proceedCheckout(checkoutScope);
     } finally {
         setButtonLoading(btn, false);
     }
 }
 
-function getSelectedPaymentMethod() {
-    const selected = document.querySelector('input[name="paymentMethod"]:checked');
+function getCheckoutScope(source = null) {
+    const sourceScope = source?.closest?.('.payment-method-panel, .bag-summary-card, .cart-panel, .cart-sidebar');
+    if (sourceScope) return sourceScope;
+
+    const activeCart = document.querySelector('#cartSidebar.active .cart-panel') || document.querySelector('#cartSidebar.active');
+    if (activeCart) return activeCart;
+
+    return document.querySelector('.bag-summary-card') || document;
+}
+
+function getSelectedPaymentMethod(scope = null) {
+    const root = scope || getCheckoutScope();
+    const selected = root.querySelector?.('input[name="paymentMethod"]:checked') || document.querySelector('input[name="paymentMethod"]:checked');
     return selected?.value || 'cash_on_delivery';
 }
 
-function getCheckoutFieldValue(name) {
+function getCheckoutField(name, scope = null) {
+    const root = scope || getCheckoutScope();
+    const scoped = root.querySelector?.(`[data-checkout-field="${name}"]`);
+    if (scoped) return scoped;
+
     const inputs = [...document.querySelectorAll(`[data-checkout-field="${name}"]`)];
-    const source = inputs.find(input => input.offsetParent !== null) || inputs[0];
-    return source?.value.trim() || '';
+    return inputs.find(input => input.offsetParent !== null && input.closest('#cartSidebar.active, .bag-summary-card')) ||
+        inputs.find(input => input.value.trim()) ||
+        inputs[0] ||
+        null;
 }
 
-function setCheckoutFieldValue(name, value) {
+function getCheckoutFieldValue(name, scope = null) {
+    return getCheckoutField(name, scope)?.value.trim() || '';
+}
+
+function setCheckoutFieldValue(name, value, scope = null) {
     if (!value) return;
-    document.querySelectorAll(`[data-checkout-field="${name}"]`).forEach(input => {
-        if (!input.value.trim()) input.value = value;
+    const field = getCheckoutField(name, scope);
+    if (field && !field.value.trim()) field.value = value;
+}
+
+function syncCheckoutDetails(details, sourceScope = null) {
+    document.querySelectorAll('[data-checkout-field]').forEach(field => {
+        const name = field.dataset.checkoutField;
+        if (!name || field.closest('#cartSidebar.active, .bag-summary-card') === sourceScope) return;
+        if (!field.value.trim() && details[name]) field.value = details[name];
     });
 }
 
-function getCheckoutDetails() {
+function getCheckoutDetails(scope = null) {
     const fallbackName = fullNameForProfile(currentProfile || currentUser || {});
-    setCheckoutFieldValue('customerName', fallbackName);
+    setCheckoutFieldValue('customerName', fallbackName, scope);
 
-    return {
-        customerName: getCheckoutFieldValue('customerName') || fallbackName,
-        customerPhone: getCheckoutFieldValue('customerPhone'),
-        deliveryLocation: getCheckoutFieldValue('deliveryLocation'),
-        deliveryNotes: getCheckoutFieldValue('deliveryNotes'),
-        paymentMethod: getSelectedPaymentMethod()
+    const details = {
+        customerName: getCheckoutFieldValue('customerName', scope) || fallbackName,
+        customerPhone: getCheckoutFieldValue('customerPhone', scope),
+        deliveryLocation: getCheckoutFieldValue('deliveryLocation', scope),
+        deliveryNotes: getCheckoutFieldValue('deliveryNotes', scope),
+        paymentMethod: getSelectedPaymentMethod(scope)
     };
+
+    syncCheckoutDetails(details, scope);
+
+    return details;
 }
 
-function validateCheckoutDetails(details) {
+function validateCheckoutDetails(details, scope = null) {
     const requirements = [
         ['customerName', details.customerName, 'Customer name is required.'],
         ['customerPhone', details.customerPhone, 'Contact number is required.'],
@@ -4453,7 +4486,7 @@ function validateCheckoutDetails(details) {
 
     requirements.forEach(([name, value, message]) => {
         const fields = [...document.querySelectorAll(`[data-checkout-field="${name}"]`)];
-        const target = fields.find(field => field.offsetParent !== null) || fields[0];
+        const target = getCheckoutField(name, scope);
         fields.forEach(field => setFieldError(field, ''));
         if (!String(value || '').trim()) {
             setFieldError(target, message);
@@ -4462,8 +4495,7 @@ function validateCheckoutDetails(details) {
     });
 
     if (details.customerPhone && !/^[0-9+\-\s()]{7,20}$/.test(details.customerPhone)) {
-        const phoneField = [...document.querySelectorAll('[data-checkout-field="customerPhone"]')]
-            .find(field => field.offsetParent !== null);
+        const phoneField = getCheckoutField('customerPhone', scope);
         setFieldError(phoneField, 'Enter a valid contact number.');
         valid = false;
     }
@@ -4506,7 +4538,9 @@ async function confirmCheckoutDetails(details, orderItems) {
                 <div class="checkout-confirm-grid">
                     <div><span>Customer</span><strong>${escapeHtml(details.customerName)}</strong></div>
                     <div><span>Contact</span><strong>${escapeHtml(details.customerPhone)}</strong></div>
+                    <div class="wide"><span>Email</span><strong>${escapeHtml(currentUser?.email || currentProfile?.email || '-')}</strong></div>
                     <div class="wide"><span>Delivery Location</span><strong>${escapeHtml(details.deliveryLocation)}</strong></div>
+                    <div><span>Order Status</span><strong>Processing after confirmation</strong></div>
                     <div><span>Payment Status</span><strong>Pending collection</strong></div>
                     <div><span>Payment Method</span><strong>${escapeHtml(getPaymentMethodLabel(details.paymentMethod))}</strong></div>
                     ${details.deliveryNotes ? `<div class="wide"><span>Delivery Notes</span><strong>${escapeHtml(details.deliveryNotes)}</strong></div>` : ''}
@@ -4535,7 +4569,7 @@ async function confirmCheckoutDetails(details, orderItems) {
     return Boolean(result.isConfirmed);
 }
 
-async function proceedCheckout() {
+async function proceedCheckout(checkoutScope = null) {
     if (!db) return showToast('Local database is not ready yet. Please restart the app.');
     if (!currentUser) return openAuthModal(false);
     if (!cart.length) return showToast('Your bag is empty.');
@@ -4550,8 +4584,9 @@ async function proceedCheckout() {
         price: Number(item.price || 0)
     }));
 
-    const checkoutDetails = getCheckoutDetails();
-    if (!validateCheckoutDetails(checkoutDetails)) {
+    const scope = checkoutScope || getCheckoutScope();
+    const checkoutDetails = getCheckoutDetails(scope);
+    if (!validateCheckoutDetails(checkoutDetails, scope)) {
         return showToast('Please complete customer name, contact number, and delivery location before checkout.', null, 'warning');
     }
 
