@@ -64,3 +64,32 @@ If you want to inspect the local database, open `data/bsh.sqlite` with any SQLit
 - The old root-level HTML/CSS/JS entry points were moved under `public/` and `assets/`.
 - Image assets stay under `public/photos/` and are baked into the Docker image.
 
+## Deploy to Render
+
+This repository includes a `render.yaml` that configures a Render.com web service using the included `Dockerfile` and attaches a Persistent Disk for SQLite and uploaded files.
+
+Quick steps:
+
+- Push this repository to GitHub (or GitLab).
+- On Render, create a new service and connect the repository. Render will read `render.yaml` and create the web service automatically.
+
+Manual setup (if you prefer the UI):
+
+- Create a new **Web Service** and choose **Docker** as the environment.
+- Set the **Dockerfile path** to `Dockerfile`.
+- Add these environment variables:
+	- `PORT` = `8000`
+	- `SQLITE_DB_PATH` = `/disk/data/bsh.sqlite`
+	- `UPLOAD_DIR` = `/disk/uploads`
+	- `UPLOAD_BUCKET_NAME` = `product-images`
+	- `MAX_UPLOAD_BYTES` = `5242880`
+- Add a **Persistent Disk** and mount it at `/disk` (1 GB is usually sufficient).
+
+Why this is required:
+
+- Render instances are ephemeral; attaching a Persistent Disk ensures the SQLite database and uploaded images persist across deploys and restarts.
+- The `Dockerfile` creates the `/disk/data` and `/disk/uploads` directories so the mounted volume is ready at runtime.
+
+After deployment, your app will be available at the service URL Render provides. The server listens on the `PORT` environment variable and uses the mounted `/disk` for persistent storage.
+
+

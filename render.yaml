@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: balayan-smashers-hub
+    env: docker
+    plan: free
+    autoDeploy: true
+    dockerfilePath: Dockerfile
+    envVars:
+      - key: PORT
+        value: "8000"
+      - key: SQLITE_DB_PATH
+        value: "/disk/data/bsh.sqlite"
+      - key: UPLOAD_DIR
+        value: "/disk/uploads"
+      - key: UPLOAD_BUCKET_NAME
+        value: "product-images"
+      - key: MAX_UPLOAD_BYTES
+        value: "5242880"
+    persistentDisk:
+      mountPath: /disk
+      sizeGb: 1
