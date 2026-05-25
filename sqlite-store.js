@@ -124,9 +124,25 @@ function passwordValidationError(password) {
   return '';
 }
 
+async function copySqliteBundle(sourceDbPath, targetDbPath) {
+  await fs.mkdir(path.dirname(targetDbPath), { recursive: true });
+  await fs.copyFile(sourceDbPath, targetDbPath);
+
+  for (const suffix of ['-wal', '-shm']) {
+    const sourceSidecar = `${sourceDbPath}${suffix}`;
+    const targetSidecar = `${targetDbPath}${suffix}`;
+    try {
+      await fs.copyFile(sourceSidecar, targetSidecar);
+    } catch {
+      // The sidecar file may not exist, and that's fine.
+    }
+  }
+}
+
 export class SQLiteStore {
-  constructor({ dbPath, uploadDir, bucketName }) {
+  constructor({ dbPath, seedDbPath, uploadDir, bucketName }) {
     this.dbPath = dbPath;
+    this.seedDbPath = seedDbPath;
     this.uploadDir = uploadDir;
     this.bucketName = bucketName;
     this.db = null;
@@ -136,12 +152,38 @@ export class SQLiteStore {
     await fs.mkdir(path.dirname(this.dbPath), { recursive: true });
     await fs.mkdir(this.uploadDir, { recursive: true });
 
+    if (this.seedDbPath && path.resolve(this.seedDbPath) !== path.resolve(this.dbPath)) {
+      try {
+        const targetStats = await fs.stat(this.dbPath);
+        const seedStats = await fs.stat(this.seedDbPath);
+        if (targetStats.size === 0 && seedStats.size > 0) {
+          await copySqliteBundle(this.seedDbPath, this.dbPath);
+        }
+      } catch {
+        try {
+          await fs.access(this.dbPath);
+        } catch {
+          try {
+            await copySqliteBundle(this.seedDbPath, this.dbPath);
+          } catch {
+            // Fall back to schema creation below if the seed DB is unavailable.
+          }
+        }
+      }
+    }
+
     this.db = new Database(this.dbPath);
     this.db.pragma('journal_mode = WAL');
     this.db.pragma('foreign_keys = ON');
     this.db.exec(this.schemaSql());
     this.ensureSchemaColumns();
-    this.seedBaseData();
+
+    const needsBootstrap = this.db.prepare('SELECT COUNT(*) AS count FROM products').get().count === 0
+      && this.db.prepare('SELECT COUNT(*) AS count FROM users').get().count === 0;
+
+    if (needsBootstrap) {
+      this.seedBaseData();
+    }
   }
 
   close() {

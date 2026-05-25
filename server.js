@@ -13,6 +13,7 @@ const __dirname = path.dirname(__filename);
 
 const PORT = Number(process.env.PORT || 8000);
 const SQLITE_DB_PATH = process.env.SQLITE_DB_PATH || path.join(__dirname, 'data', 'bsh.sqlite');
+const SEED_SQLITE_DB_PATH = path.join(__dirname, 'data', 'bsh.sqlite');
 const UPLOAD_BUCKET_NAME = process.env.UPLOAD_BUCKET_NAME || 'product-images';
 const UPLOAD_ROOT = process.env.UPLOAD_DIR || path.join(__dirname, 'public', 'uploads');
 const MAX_UPLOAD_BYTES = Number(process.env.MAX_UPLOAD_BYTES || 5 * 1024 * 1024);
@@ -36,6 +37,7 @@ const upload = multer({
 });
 const store = new SQLiteStore({
   dbPath: SQLITE_DB_PATH,
+  seedDbPath: SEED_SQLITE_DB_PATH,
   uploadDir: UPLOAD_ROOT,
   bucketName: UPLOAD_BUCKET_NAME
 });
