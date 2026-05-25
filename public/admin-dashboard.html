@@ -293,6 +293,26 @@
                                     <option value="equipments">Equipments</option>
                                     <option value="accessories">Accessories</option>
                                 </select>
+                                <select id="adminProductStatusFilter">
+                                    <option value="all">All statuses</option>
+                                    <option value="active">Active</option>
+                                    <option value="draft">Draft</option>
+                                    <option value="out_of_stock">Out of stock</option>
+                                </select>
+                                <select id="adminProductStockFilter">
+                                    <option value="all">All stock</option>
+                                    <option value="low">Low stock</option>
+                                    <option value="available">Available</option>
+                                    <option value="empty">No stock</option>
+                                </select>
+                                <select id="adminProductSort">
+                                    <option value="newest">Newest first</option>
+                                    <option value="name-asc">Name A-Z</option>
+                                    <option value="price-asc">Price: low to high</option>
+                                    <option value="price-desc">Price: high to low</option>
+                                    <option value="stock-asc">Stock: low to high</option>
+                                </select>
+                                <button class="admin-btn ghost" type="button" id="exportProductsBtn"><i class="fas fa-file-export"></i> Export</button>
                             </div>
                         </div>
                         <div class="admin-products" id="adminProductsList">
@@ -308,6 +328,17 @@
                         <h3>Customers and Admin Accounts</h3>
                         <div class="admin-tools">
                             <input type="search" id="adminCustomerSearch" placeholder="Search customer...">
+                            <select id="adminCustomerRoleFilter">
+                                <option value="all">All roles</option>
+                                <option value="customer">Customers</option>
+                                <option value="admin">Admins</option>
+                            </select>
+                            <select id="adminCustomerSort">
+                                <option value="newest">Newest first</option>
+                                <option value="name-asc">Name A-Z</option>
+                                <option value="email-asc">Email A-Z</option>
+                            </select>
+                            <button class="admin-btn ghost" type="button" id="exportCustomersBtn"><i class="fas fa-file-export"></i> Export</button>
                         </div>
                     </div>
                     <div class="admin-table-wrap">
@@ -352,6 +383,13 @@
                                 <option value="follow_up">Follow up</option>
                                 <option value="inactive">Inactive</option>
                             </select>
+                            <select id="adminCrmSort">
+                                <option value="spent-desc">Highest spent</option>
+                                <option value="orders-desc">Most orders</option>
+                                <option value="name-asc">Name A-Z</option>
+                                <option value="last-order-desc">Latest order</option>
+                            </select>
+                            <button class="admin-btn ghost" type="button" id="exportCrmBtn"><i class="fas fa-file-export"></i> Export</button>
                         </div>
                     </div>
                     <div class="admin-table-wrap">
@@ -390,7 +428,13 @@
                                 <option value="update_crm_contact">Update CRM Contact</option>
                                 <option value="update_password">Update Password</option>
                             </select>
+                            <select id="adminAuditSort">
+                                <option value="newest">Newest first</option>
+                                <option value="oldest">Oldest first</option>
+                                <option value="action-asc">Action A-Z</option>
+                            </select>
                             <button class="admin-btn ghost" type="button" id="refreshAuditLogsBtn"><i class="fas fa-rotate"></i> Refresh</button>
+                            <button class="admin-btn ghost" type="button" id="exportAuditBtn"><i class="fas fa-file-export"></i> Export</button>
                         </div>
                     </div>
                     <p class="admin-soft-text">This saves admin actions in the <strong>audit_logs</strong> table in Supabase.</p>
@@ -444,7 +488,33 @@
                 <div class="admin-panel">
                     <div class="admin-panel-head">
                         <h3>Orders</h3>
-                        <span class="admin-soft-text">Ready for checkout/order records.</span>
+                        <div class="admin-tools">
+                            <input type="search" id="adminOrderSearch" placeholder="Search order, customer, reference...">
+                            <select id="adminOrderStatusFilter">
+                                <option value="all">All statuses</option>
+                                <option value="pending">Pending</option>
+                                <option value="processing">Processing</option>
+                                <option value="completed">Completed</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                            <select id="adminOrderPaymentFilter">
+                                <option value="all">All payments</option>
+                                <option value="pending">Payment pending</option>
+                                <option value="paid">Paid</option>
+                                <option value="failed">Failed</option>
+                                <option value="refunded">Refunded</option>
+                            </select>
+                            <input type="date" id="adminOrderDateFrom" aria-label="Order date from">
+                            <input type="date" id="adminOrderDateTo" aria-label="Order date to">
+                            <select id="adminOrderSort">
+                                <option value="newest">Newest first</option>
+                                <option value="oldest">Oldest first</option>
+                                <option value="total-desc">Highest total</option>
+                                <option value="total-asc">Lowest total</option>
+                            </select>
+                            <button class="admin-btn ghost" type="button" id="refreshOrdersBtn"><i class="fas fa-rotate"></i> Refresh</button>
+                            <button class="admin-btn ghost" type="button" id="exportOrdersBtn"><i class="fas fa-file-export"></i> Export</button>
+                        </div>
                     </div>
                     <div class="admin-table-wrap">
                         <table class="admin-table">
@@ -452,6 +522,8 @@
                                 <tr>
                                     <th>Order</th>
                                     <th>Customer</th>
+                                    <th>Contact</th>
+                                    <th>Delivery</th>
                                     <th>Status</th>
                                     <th>Payment</th>
                                     <th>Total</th>
@@ -459,7 +531,7 @@
                                 </tr>
                             </thead>
                             <tbody id="adminOrdersList">
-                                <tr><td colspan="6">Loading orders...</td></tr>
+                                <tr><td colspan="8">Loading orders...</td></tr>
                             </tbody>
                         </table>
                     </div>

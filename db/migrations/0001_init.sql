@@ -139,6 +139,10 @@ create table if not exists public.orders (
     payment_method text not null default 'cash_on_delivery',
     payment_status text not null default 'pending' check (payment_status in ('pending', 'paid', 'failed', 'refunded')),
     payment_reference text,
+    customer_name text,
+    customer_phone text,
+    delivery_location text,
+    delivery_notes text,
     total_amount numeric(10,2) not null default 0,
     created_at timestamptz not null default now()
 );
@@ -146,6 +150,10 @@ create table if not exists public.orders (
 alter table public.orders add column if not exists payment_method text not null default 'cash_on_delivery';
 alter table public.orders add column if not exists payment_status text not null default 'pending' check (payment_status in ('pending', 'paid', 'failed', 'refunded'));
 alter table public.orders add column if not exists payment_reference text;
+alter table public.orders add column if not exists customer_name text;
+alter table public.orders add column if not exists customer_phone text;
+alter table public.orders add column if not exists delivery_location text;
+alter table public.orders add column if not exists delivery_notes text;
 
 create table if not exists public.order_items (
     id uuid primary key default gen_random_uuid(),

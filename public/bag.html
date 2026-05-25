@@ -253,6 +253,20 @@
                                 <small>No payment gateway fees. Pay when your order arrives.</small>
                             </span>
                         </label>
+                        <div class="payment-detail-grid">
+                            <label>Customer Name
+                                <input type="text" id="checkoutCustomerName" data-checkout-field="customerName" placeholder="Full name" autocomplete="name" required>
+                            </label>
+                            <label>Contact Number
+                                <input type="tel" id="checkoutCustomerPhone" data-checkout-field="customerPhone" placeholder="09XXXXXXXXX" autocomplete="tel" required>
+                            </label>
+                            <label class="payment-detail-wide">Delivery Location
+                                <textarea id="checkoutDeliveryLocation" data-checkout-field="deliveryLocation" rows="3" placeholder="House number, street, barangay, city/province" autocomplete="street-address" required></textarea>
+                            </label>
+                            <label class="payment-detail-wide">Delivery Notes
+                                <input type="text" id="checkoutDeliveryNotes" data-checkout-field="deliveryNotes" placeholder="Landmark, preferred time, or instructions">
+                            </label>
+                        </div>
                     </div>
 
                     <button type="button" class="bag-checkout-btn btn-checkout">

@@ -18,6 +18,7 @@ let currentProfile = null;
 let auditLogs = [];
 let crmContacts = [];
 let crmOrderStats = {};
+let adminOrders = [];
 let completedSalesTotal = 0;
 let productSalesStats = {};
 let pendingCheckoutAfterLogin = false;
@@ -25,6 +26,74 @@ let selectedAdminProductIds = new Set();
 let adminDraftImageItems = [];
 let BARCODE_COLUMN_MISSING = false;
 let sweetAlertPromise = null;
+
+function debounce(fn, delay = 180) {
+    let timer = null;
+    return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn(...args), delay);
+    };
+}
+
+function setButtonLoading(button, loading, text = 'Working...') {
+    if (!button) return;
+    if (loading) {
+        button.dataset.originalText = button.innerHTML;
+        button.disabled = true;
+        button.classList.add('is-loading');
+        button.innerHTML = `<span class="btn-spinner" aria-hidden="true"></span>${escapeHtml(text)}`;
+    } else {
+        button.disabled = false;
+        button.classList.remove('is-loading');
+        if (button.dataset.originalText) button.innerHTML = button.dataset.originalText;
+        delete button.dataset.originalText;
+    }
+}
+
+function setFieldError(field, message = '') {
+    if (!field) return;
+    field.classList.toggle('field-invalid', Boolean(message));
+    field.setAttribute('aria-invalid', message ? 'true' : 'false');
+
+    let errorEl = field.parentElement?.querySelector('.field-inline-error');
+    if (!message) {
+        errorEl?.remove();
+        return;
+    }
+
+    if (!errorEl) {
+        errorEl = document.createElement('small');
+        errorEl.className = 'field-inline-error';
+        field.insertAdjacentElement('afterend', errorEl);
+    }
+    errorEl.textContent = message;
+}
+
+function clearFieldErrorOnInput(field) {
+    field?.addEventListener('input', () => setFieldError(field, ''));
+    field?.addEventListener('change', () => setFieldError(field, ''));
+}
+
+function csvEscape(value) {
+    const clean = String(value ?? '').replace(/\r?\n|\r/g, ' ').trim();
+    return /[",]/.test(clean) ? `"${clean.replace(/"/g, '""')}"` : clean;
+}
+
+function exportRowsToCsv(filename, headers, rows) {
+    const csv = [
+        headers.map(csvEscape).join(','),
+        ...rows.map(row => row.map(csvEscape).join(','))
+    ].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+}
 
 function ensureSweetAlert() {
     if (window.Swal) return Promise.resolve(window.Swal);
@@ -89,11 +158,18 @@ function showAdminConfirm({ title, message, confirmText = 'Yes', cancelText = 'N
             showCancelButton: true,
             confirmButtonText: confirmText,
             cancelButtonText: cancelText,
-            confirmButtonColor: danger ? '#e53935' : '#111827',
-            cancelButtonColor: cancelDanger ? '#dc2626' : '#e5e7eb',
             reverseButtons: true,
-            background: '#111827',
-            color: '#fff'
+            focusCancel: !danger,
+            buttonsStyling: false,
+            customClass: {
+                popup: 'bsh-swal-popup',
+                title: 'bsh-swal-title',
+                htmlContainer: 'bsh-swal-text',
+                confirmButton: `bsh-swal-btn ${danger ? 'danger' : 'primary'}`,
+                cancelButton: `bsh-swal-btn ${cancelDanger ? 'danger-muted' : 'secondary'}`
+            },
+            showClass: { popup: 'swal2-show bsh-swal-show' },
+            hideClass: { popup: 'swal2-hide bsh-swal-hide' }
         }).then(result => Boolean(result.isConfirmed));
     }
 
@@ -157,6 +233,7 @@ function showAdminConfirm({ title, message, confirmText = 'Yes', cancelText = 'N
 
 function showToast(message, link, type = 'success') {
     const isWarning = type === 'warning' || /select a color|select a size|select/i.test(message);
+    const icon = type === 'error' ? 'error' : isWarning ? 'warning' : 'success';
 
     if (window.Swal) {
         const html = link
@@ -166,13 +243,19 @@ function showToast(message, link, type = 'success') {
         Swal.fire({
             toast: true,
             position: 'top-end',
-            icon: isWarning ? 'warning' : 'success',
+            icon,
             html,
             showConfirmButton: false,
             timer: 2600,
             timerProgressBar: true,
-            background: '#111827',
-            color: '#fff'
+            buttonsStyling: false,
+            customClass: {
+                popup: `bsh-swal-toast ${icon}`,
+                htmlContainer: 'bsh-swal-toast-text',
+                timerProgressBar: 'bsh-swal-progress'
+            },
+            showClass: { popup: 'swal2-show bsh-swal-toast-show' },
+            hideClass: { popup: 'swal2-hide bsh-swal-hide' }
         });
         return;
     }
@@ -657,6 +740,7 @@ window.BSHRequireLoginForTransaction = requireLoginForTransaction;
 function initBasicUI() {
     setTimeout(() => document.getElementById('preloader')?.classList.add('hidden'), 500);
     ensureSidebarPaymentMethod();
+    bindCheckoutValidation();
 
     window.addEventListener('scroll', () => {
         document.getElementById('header')?.classList.toggle('scrolled', window.scrollY > 50);
@@ -724,6 +808,10 @@ function initBasicUI() {
     initMobileNav();
 }
 
+function bindCheckoutValidation() {
+    document.querySelectorAll('[data-checkout-field]').forEach(field => clearFieldErrorOnInput(field));
+}
+
 function ensureSidebarPaymentMethod() {
     document.querySelectorAll('.cart-footer').forEach(footer => {
         if (footer.querySelector('.payment-method-panel')) return;
@@ -744,6 +832,20 @@ function ensureSidebarPaymentMethod() {
                     <small>No gateway fees. Pay when your order arrives.</small>
                 </span>
             </label>
+            <div class="payment-detail-grid">
+                <label>Customer Name
+                    <input type="text" data-checkout-field="customerName" placeholder="Full name" autocomplete="name" required>
+                </label>
+                <label>Contact Number
+                    <input type="tel" data-checkout-field="customerPhone" placeholder="09XXXXXXXXX" autocomplete="tel" required>
+                </label>
+                <label class="payment-detail-wide">Delivery Location
+                    <textarea data-checkout-field="deliveryLocation" rows="3" placeholder="House number, street, barangay, city/province" autocomplete="street-address" required></textarea>
+                </label>
+                <label class="payment-detail-wide">Delivery Notes
+                    <input type="text" data-checkout-field="deliveryNotes" placeholder="Landmark, preferred time, or instructions">
+                </label>
+            </div>
         `;
         summary.insertAdjacentElement('afterend', panel);
     });
@@ -2805,15 +2907,35 @@ async function initAdminDashboard() {
     document.getElementById('deleteSelectedProductsBtn')?.addEventListener('click', deleteSelectedAdminProducts);
     document.getElementById('selectAllProductsBtn')?.addEventListener('click', toggleSelectAllAdminProducts);
     document.getElementById('cancelEditProductBtn')?.addEventListener('click', resetAdminProductForm);
-    document.getElementById('adminProductSearch')?.addEventListener('input', renderAdminProducts);
+    document.getElementById('adminProductSearch')?.addEventListener('input', debounce(renderAdminProducts));
     document.getElementById('adminProductCategoryFilter')?.addEventListener('change', renderAdminProducts);
-    document.getElementById('adminCustomerSearch')?.addEventListener('input', renderAdminCustomers);
-    document.getElementById('adminCrmSearch')?.addEventListener('input', renderAdminCrmContacts);
+    document.getElementById('adminProductStatusFilter')?.addEventListener('change', renderAdminProducts);
+    document.getElementById('adminProductStockFilter')?.addEventListener('change', renderAdminProducts);
+    document.getElementById('adminProductSort')?.addEventListener('change', renderAdminProducts);
+    document.getElementById('exportProductsBtn')?.addEventListener('click', exportAdminProducts);
+    document.getElementById('adminCustomerSearch')?.addEventListener('input', debounce(renderAdminCustomers));
+    document.getElementById('adminCustomerRoleFilter')?.addEventListener('change', renderAdminCustomers);
+    document.getElementById('adminCustomerSort')?.addEventListener('change', renderAdminCustomers);
+    document.getElementById('exportCustomersBtn')?.addEventListener('click', exportAdminCustomers);
+    document.getElementById('adminCrmSearch')?.addEventListener('input', debounce(renderAdminCrmContacts));
     document.getElementById('adminCrmStatusFilter')?.addEventListener('change', renderAdminCrmContacts);
-    document.getElementById('adminAuditSearch')?.addEventListener('input', renderAdminAuditLogs);
+    document.getElementById('adminCrmSort')?.addEventListener('change', renderAdminCrmContacts);
+    document.getElementById('exportCrmBtn')?.addEventListener('click', exportAdminCrm);
+    document.getElementById('adminAuditSearch')?.addEventListener('input', debounce(renderAdminAuditLogs));
     document.getElementById('adminAuditActionFilter')?.addEventListener('change', renderAdminAuditLogs);
-    document.getElementById('refreshAuditLogsBtn')?.addEventListener('click', loadAdminAuditLogs);
+    document.getElementById('adminAuditSort')?.addEventListener('change', renderAdminAuditLogs);
+    document.getElementById('refreshAuditLogsBtn')?.addEventListener('click', e => loadAdminAuditLogs(e.currentTarget));
+    document.getElementById('exportAuditBtn')?.addEventListener('click', exportAdminAuditLogs);
+    document.getElementById('adminOrderSearch')?.addEventListener('input', debounce(renderAdminOrders));
+    document.getElementById('adminOrderStatusFilter')?.addEventListener('change', renderAdminOrders);
+    document.getElementById('adminOrderPaymentFilter')?.addEventListener('change', renderAdminOrders);
+    document.getElementById('adminOrderDateFrom')?.addEventListener('change', renderAdminOrders);
+    document.getElementById('adminOrderDateTo')?.addEventListener('change', renderAdminOrders);
+    document.getElementById('adminOrderSort')?.addEventListener('change', renderAdminOrders);
+    document.getElementById('refreshOrdersBtn')?.addEventListener('click', e => loadAdminOrders(e.currentTarget));
+    document.getElementById('exportOrdersBtn')?.addEventListener('click', exportAdminOrders);
     document.getElementById('adminPasswordForm')?.addEventListener('submit', updateAdminPassword);
+    bindAdminProductValidation();
 
     // Show barcode preview as admin types SKU for new products
     const skuInput = document.getElementById('productSku');
@@ -2945,9 +3067,79 @@ function previewAdminImage(e) {
         return;
     }
 
-    appendAdminDraftImagesFromFiles(files);
+    const validFiles = files.filter(file => {
+        const isImage = /^image\//.test(file.type);
+        const isReasonableSize = file.size <= 5 * 1024 * 1024;
+        if (!isImage) showToast(`${file.name} is not a supported image file.`, null, 'warning');
+        if (isImage && !isReasonableSize) showToast(`${file.name} is larger than 5MB.`, null, 'warning');
+        return isImage && isReasonableSize;
+    });
+
+    if (!validFiles.length) {
+        e.target.value = '';
+        return;
+    }
+
+    appendAdminDraftImagesFromFiles(validFiles);
     e.target.value = '';
     renderAdminImagePreview();
+}
+
+function bindAdminProductValidation() {
+    [
+        'productName',
+        'productSubcategory',
+        'productPrice',
+        'productOriginalPrice',
+        'productStock',
+        'checkoutCustomerName',
+        'checkoutCustomerPhone',
+        'checkoutDeliveryLocation'
+    ].forEach(id => clearFieldErrorOnInput(document.getElementById(id)));
+}
+
+function validateAdminProductForm() {
+    const fields = {
+        name: document.getElementById('productName'),
+        subcategory: document.getElementById('productSubcategory'),
+        price: document.getElementById('productPrice'),
+        originalPrice: document.getElementById('productOriginalPrice'),
+        stock: document.getElementById('productStock')
+    };
+    let valid = true;
+
+    Object.values(fields).forEach(field => setFieldError(field, ''));
+
+    if (!fields.name?.value.trim()) {
+        setFieldError(fields.name, 'Product name is required.');
+        valid = false;
+    }
+
+    if (!fields.subcategory?.value.trim()) {
+        setFieldError(fields.subcategory, 'Choose a subcategory.');
+        valid = false;
+    }
+
+    const price = Number(fields.price?.value || 0);
+    const originalPrice = Number(fields.originalPrice?.value || 0);
+    const stock = Number(fields.stock?.value || 0);
+
+    if (!Number.isFinite(price) || price <= 0) {
+        setFieldError(fields.price, 'Enter a valid selling price.');
+        valid = false;
+    }
+
+    if (fields.originalPrice?.value && originalPrice < price) {
+        setFieldError(fields.originalPrice, 'Original price should not be lower than the selling price.');
+        valid = false;
+    }
+
+    if (!Number.isInteger(stock) || stock < 0) {
+        setFieldError(fields.stock, 'Stock must be a whole number of 0 or more.');
+        valid = false;
+    }
+
+    return valid;
 }
 
 function getProductPayload(imageData, editingId = null) {
@@ -3145,6 +3337,10 @@ async function saveAdminProduct(e) {
         ? products.find(p => String(p.id) === String(editingId))
         : null;
 
+    if (!validateAdminProductForm()) {
+        return showToast('Please fix the highlighted product fields.', null, 'warning');
+    }
+
     if (editingId) {
         const productName = document.getElementById('productName')?.value?.trim() || 'this product';
         const confirmed = await showAdminConfirm({
@@ -3162,8 +3358,7 @@ async function saveAdminProduct(e) {
         return showToast('Please keep at least one product photo.');
     }
 
-    btn.disabled = true;
-    btn.textContent = editingId ? 'UPDATING...' : 'SAVING...';
+    setButtonLoading(btn, true, editingId ? 'Updating...' : 'Saving...');
 
     try {
         const keptExistingImageData = getAdminDraftExistingImageData();
@@ -3239,9 +3434,9 @@ async function saveAdminProduct(e) {
         renderAdminProducts();
         updateAdminStats();
     } catch (err) {
-        showToast(err.message || 'Something went wrong.');
+        showToast(err.message || 'Something went wrong.', null, 'error');
     } finally {
-        btn.disabled = false;
+        setButtonLoading(btn, false);
         btn.textContent = document.getElementById('editingProductId').value ? 'UPDATE PRODUCT' : 'SAVE PRODUCT';
     }
 }
@@ -3326,8 +3521,12 @@ function editAdminProduct(product) {
 function getFilteredAdminProducts() {
     const query = (document.getElementById('adminProductSearch')?.value || '').toLowerCase().trim();
     const category = document.getElementById('adminProductCategoryFilter')?.value || 'all';
+    const status = document.getElementById('adminProductStatusFilter')?.value || 'all';
+    const stockFilter = document.getElementById('adminProductStockFilter')?.value || 'all';
+    const sort = document.getElementById('adminProductSort')?.value || 'newest';
 
-    return products.filter(product => {
+    const filtered = products.filter(product => {
+        const stock = Number(product.stock || 0);
         const matchesSearch = !query || [
             product.name,
             product.category,
@@ -3341,9 +3540,45 @@ function getFilteredAdminProducts() {
         ].some(value => String(value || '').toLowerCase().includes(query));
 
         const matchesCategory = category === 'all' || product.category === category;
+        const matchesStatus = status === 'all' || String(product.status || 'active') === status;
+        const matchesStock =
+            stockFilter === 'all' ||
+            (stockFilter === 'low' && stock > 0 && stock <= 5) ||
+            (stockFilter === 'available' && stock > 0) ||
+            (stockFilter === 'empty' && stock <= 0);
 
-        return matchesSearch && matchesCategory;
+        return matchesSearch && matchesCategory && matchesStatus && matchesStock;
     });
+
+    return filtered.sort((a, b) => {
+        if (sort === 'name-asc') return String(a.name || '').localeCompare(String(b.name || ''));
+        if (sort === 'price-asc') return Number(a.price || 0) - Number(b.price || 0);
+        if (sort === 'price-desc') return Number(b.price || 0) - Number(a.price || 0);
+        if (sort === 'stock-asc') return Number(a.stock || 0) - Number(b.stock || 0);
+        return String(b.created_at || b.id || '').localeCompare(String(a.created_at || a.id || ''));
+    });
+}
+
+function exportAdminProducts() {
+    const rows = getFilteredAdminProducts();
+    if (!rows.length) return showToast('No products to export.', null, 'warning');
+
+    exportRowsToCsv(
+        `products-${new Date().toISOString().slice(0, 10)}.csv`,
+        ['ID', 'Name', 'Category', 'Subcategory', 'Status', 'Stock', 'Price', 'SKU', 'Barcode'],
+        rows.map(product => [
+            product.id,
+            product.name,
+            product.category,
+            product.subcategory,
+            product.status || 'active',
+            product.stock || 0,
+            product.price || 0,
+            product.sku || '',
+            product.barcode || ''
+        ])
+    );
+    showToast('Product export prepared.');
 }
 
 
@@ -3656,7 +3891,7 @@ function renderAdminProducts() {
             });
 
             row.querySelector('[data-edit-product]')?.addEventListener('click', () => editAdminProduct(product));
-            row.querySelector('[data-delete-product]')?.addEventListener('click', () => deleteAdminProduct(product));
+            row.querySelector('[data-delete-product]')?.addEventListener('click', e => deleteAdminProduct(product, e.currentTarget));
 
             target.appendChild(row);
         });
@@ -3668,6 +3903,7 @@ function renderAdminProducts() {
 }
 
 async function deleteSelectedAdminProducts() {
+    const actionBtn = document.getElementById('deleteSelectedProductsBtn');
     const selectedIds = [...selectedAdminProductIds];
 
     if (selectedIds.length === 0) {
@@ -3685,35 +3921,43 @@ async function deleteSelectedAdminProducts() {
 
     if (!confirmed) return;
 
-    const { error } = await db
-        .from('products')
-        .delete()
-        .in('id', selectedIds);
+    setButtonLoading(actionBtn, true, 'Deleting...');
 
-    if (error) return showToast(error.message);
+    try {
+        const { error } = await db
+            .from('products')
+            .delete()
+            .in('id', selectedIds);
 
-    const imagePaths = [...new Set(selectedProducts.flatMap(product => getAllProductImagePaths(product)))];
+        if (error) throw new Error(error.message);
 
-    if (imagePaths.length) {
-        await db.storage.from(PRODUCT_IMAGE_BUCKET).remove(imagePaths);
+        const imagePaths = [...new Set(selectedProducts.flatMap(product => getAllProductImagePaths(product)))];
+
+        if (imagePaths.length) {
+            await db.storage.from(PRODUCT_IMAGE_BUCKET).remove(imagePaths);
+        }
+
+        await Promise.all(selectedProducts.map(product => logAdminAction('delete_product', 'products', product.id, {
+            product_name: product.name,
+            category: product.category,
+            image_path: product.image_path || null,
+            bulk_delete: true
+        })));
+
+        selectedAdminProductIds.clear();
+        showToast(`${selectedProducts.length} product${selectedProducts.length > 1 ? 's' : ''} deleted from database.`);
+
+        await fetchProducts();
+        renderAdminProducts();
+        updateAdminStats();
+    } catch (error) {
+        showToast(error.message || 'Could not delete selected products.', null, 'error');
+    } finally {
+        setButtonLoading(actionBtn, false);
     }
-
-    await Promise.all(selectedProducts.map(product => logAdminAction('delete_product', 'products', product.id, {
-        product_name: product.name,
-        category: product.category,
-        image_path: product.image_path || null,
-        bulk_delete: true
-    })));
-
-    selectedAdminProductIds.clear();
-    showToast(`${selectedProducts.length} product${selectedProducts.length > 1 ? 's' : ''} deleted from database.`);
-
-    await fetchProducts();
-    renderAdminProducts();
-    updateAdminStats();
 }
 
-async function deleteAdminProduct(product) {
+async function deleteAdminProduct(product, actionBtn = null) {
     const confirmed = await showAdminConfirm({
         title: 'Delete product?',
         message: `Are you sure you want to delete ${product.name}? This will remove the product record and its uploaded photo.`,
@@ -3724,31 +3968,39 @@ async function deleteAdminProduct(product) {
 
     if (!confirmed) return;
 
-    const { error } = await db
-        .from('products')
-        .delete()
-        .eq('id', product.id);
+    setButtonLoading(actionBtn, true, 'Deleting...');
 
-    if (error) return showToast(error.message);
+    try {
+        const { error } = await db
+            .from('products')
+            .delete()
+            .eq('id', product.id);
 
-    await logAdminAction('delete_product', 'products', product.id, {
-        product_name: product.name,
-        category: product.category,
-        image_path: product.image_path || null
-    });
+        if (error) throw new Error(error.message);
 
-    const imagePaths = getAllProductImagePaths(product);
+        await logAdminAction('delete_product', 'products', product.id, {
+            product_name: product.name,
+            category: product.category,
+            image_path: product.image_path || null
+        });
 
-    if (imagePaths.length) {
-        await db.storage.from(PRODUCT_IMAGE_BUCKET).remove(imagePaths);
+        const imagePaths = getAllProductImagePaths(product);
+
+        if (imagePaths.length) {
+            await db.storage.from(PRODUCT_IMAGE_BUCKET).remove(imagePaths);
+        }
+
+        selectedAdminProductIds.delete(String(product.id));
+        showToast('Product deleted from database.');
+
+        await fetchProducts();
+        renderAdminProducts();
+        updateAdminStats();
+    } catch (error) {
+        showToast(error.message || 'Could not delete product.', null, 'error');
+    } finally {
+        setButtonLoading(actionBtn, false);
     }
-
-    selectedAdminProductIds.delete(String(product.id));
-    showToast('Product deleted from database.');
-
-    await fetchProducts();
-    renderAdminProducts();
-    updateAdminStats();
 }
 
 async function loadAdminCustomers() {
@@ -3778,13 +4030,24 @@ function renderAdminCustomers() {
     if (!tbody) return;
 
     const query = (document.getElementById('adminCustomerSearch')?.value || '').toLowerCase().trim();
+    const roleFilter = document.getElementById('adminCustomerRoleFilter')?.value || 'all';
+    const sort = document.getElementById('adminCustomerSort')?.value || 'newest';
 
     const users = (window.adminUsersCache || []).filter(user => {
         const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
-
-        return !query || [user.email, fullName, user.role].some(value =>
+        const role = user.role || 'customer';
+        const matchesRole = roleFilter === 'all' || role === roleFilter;
+        const matchesQuery = !query || [user.email, fullName, role].some(value =>
             String(value || '').toLowerCase().includes(query)
         );
+
+        return matchesRole && matchesQuery;
+    }).sort((a, b) => {
+        const nameA = `${a.first_name || ''} ${a.last_name || ''}`.trim();
+        const nameB = `${b.first_name || ''} ${b.last_name || ''}`.trim();
+        if (sort === 'name-asc') return nameA.localeCompare(nameB);
+        if (sort === 'email-asc') return String(a.email || '').localeCompare(String(b.email || ''));
+        return String(b.created_at || '').localeCompare(String(a.created_at || ''));
     });
 
     if (users.length === 0) {
@@ -3806,6 +4069,33 @@ function renderAdminCustomers() {
             </tr>
         `;
     }).join('');
+}
+
+function exportAdminCustomers() {
+    const tbodyRows = [...document.querySelectorAll('#adminCustomersList tr')];
+    const users = (window.adminUsersCache || []).filter(user => {
+        const text = `${user.email || ''} ${user.first_name || ''} ${user.last_name || ''} ${user.role || ''}`.toLowerCase();
+        const query = (document.getElementById('adminCustomerSearch')?.value || '').toLowerCase().trim();
+        const roleFilter = document.getElementById('adminCustomerRoleFilter')?.value || 'all';
+        return (!query || text.includes(query)) && (roleFilter === 'all' || (user.role || 'customer') === roleFilter);
+    });
+
+    if (!users.length || !tbodyRows.length) return showToast('No customers to export.', null, 'warning');
+
+    exportRowsToCsv(
+        `customers-${new Date().toISOString().slice(0, 10)}.csv`,
+        ['ID', 'Email', 'First Name', 'Last Name', 'Role', 'Date of Birth', 'Created'],
+        users.map(user => [
+            user.id,
+            user.email,
+            user.first_name || '',
+            user.last_name || '',
+            user.role || 'customer',
+            user.date_of_birth || '',
+            user.created_at || ''
+        ])
+    );
+    showToast('Customer export prepared.');
 }
 
 function fullNameForProfile(user = {}) {
@@ -3895,6 +4185,7 @@ function renderAdminCrmContacts() {
 
     const query = (document.getElementById('adminCrmSearch')?.value || '').toLowerCase().trim();
     const statusFilter = document.getElementById('adminCrmStatusFilter')?.value || 'all';
+    const sort = document.getElementById('adminCrmSort')?.value || 'spent-desc';
     const rows = getCrmRows().filter(contact => {
         const matchesStatus = statusFilter === 'all' || contact.status === statusFilter;
         const matchesQuery = !query || [
@@ -3906,6 +4197,11 @@ function renderAdminCrmContacts() {
         ].some(value => String(value || '').toLowerCase().includes(query));
 
         return matchesStatus && matchesQuery;
+    }).sort((a, b) => {
+        if (sort === 'orders-desc') return Number(b.orders || 0) - Number(a.orders || 0);
+        if (sort === 'name-asc') return String(a.full_name || '').localeCompare(String(b.full_name || ''));
+        if (sort === 'last-order-desc') return String(b.lastOrder || '').localeCompare(String(a.lastOrder || ''));
+        return Number(b.spent || 0) - Number(a.spent || 0);
     });
 
     updateCrmStats(getCrmRows());
@@ -3941,8 +4237,45 @@ function renderAdminCrmContacts() {
     }).join('');
 
     tbody.querySelectorAll('[data-save-crm]').forEach(button => {
-        button.addEventListener('click', () => saveCrmContact(button.closest('tr')));
+        button.addEventListener('click', () => saveCrmContact(button.closest('tr'), button));
     });
+}
+
+function getFilteredCrmRows() {
+    const query = (document.getElementById('adminCrmSearch')?.value || '').toLowerCase().trim();
+    const statusFilter = document.getElementById('adminCrmStatusFilter')?.value || 'all';
+    return getCrmRows().filter(contact => {
+        const matchesStatus = statusFilter === 'all' || contact.status === statusFilter;
+        const matchesQuery = !query || [
+            contact.full_name,
+            contact.email,
+            contact.phone,
+            contact.status,
+            contact.notes
+        ].some(value => String(value || '').toLowerCase().includes(query));
+        return matchesStatus && matchesQuery;
+    });
+}
+
+function exportAdminCrm() {
+    const rows = getFilteredCrmRows();
+    if (!rows.length) return showToast('No CRM contacts to export.', null, 'warning');
+
+    exportRowsToCsv(
+        `crm-contacts-${new Date().toISOString().slice(0, 10)}.csv`,
+        ['Name', 'Email', 'Phone', 'Status', 'Orders', 'Spent', 'Last Order', 'Notes'],
+        rows.map(contact => [
+            contact.full_name,
+            contact.email,
+            contact.phone,
+            getCrmStatusLabel(contact.status),
+            contact.orders || 0,
+            contact.spent || 0,
+            contact.lastOrder || '',
+            contact.notes || ''
+        ])
+    );
+    showToast('CRM export prepared.');
 }
 
 function updateCrmStats(rows = getCrmRows()) {
@@ -3957,7 +4290,7 @@ function updateCrmStats(rows = getCrmRows()) {
     if (document.getElementById('crmRevenue')) document.getElementById('crmRevenue').textContent = formatPeso(revenue);
 }
 
-async function saveCrmContact(row) {
+async function saveCrmContact(row, button = null) {
     if (!row) return;
 
     const email = row.dataset.crmEmail || '';
@@ -3973,11 +4306,16 @@ async function saveCrmContact(row) {
         last_contacted_at: new Date().toISOString()
     };
 
+    setButtonLoading(button, true, 'Saving...');
+
     const { error } = await db
         .from('crm_contacts')
         .upsert(payload, { onConflict: 'email' });
 
-    if (error) return showToast(error.message, null, 'warning');
+    if (error) {
+        setButtonLoading(button, false);
+        return showToast(error.message, null, 'warning');
+    }
 
     await logAdminAction('update_crm_contact', 'crm_contacts', email, {
         customer_email: email,
@@ -3987,6 +4325,7 @@ async function saveCrmContact(row) {
     showToast('CRM contact saved.');
     await loadAdminCrmContacts();
     await loadAdminAuditLogs();
+    setButtonLoading(button, false);
 }
 
 function cartRowsForDatabase() {
@@ -4055,8 +4394,9 @@ async function saveCustomerFavoritesToDatabase() {
     }
 }
 
-function handleCheckoutClick(e) {
+async function handleCheckoutClick(e) {
     e.preventDefault();
+    const btn = e.currentTarget;
     loadCartFromStorageOnly();
     updateUI();
 
@@ -4064,12 +4404,135 @@ function handleCheckoutClick(e) {
 
     if (!requireLoginForTransaction('checkout')) return;
 
-    proceedCheckout();
+    setButtonLoading(btn, true, 'Checking...');
+    try {
+        await proceedCheckout();
+    } finally {
+        setButtonLoading(btn, false);
+    }
 }
 
 function getSelectedPaymentMethod() {
     const selected = document.querySelector('input[name="paymentMethod"]:checked');
     return selected?.value || 'cash_on_delivery';
+}
+
+function getCheckoutFieldValue(name) {
+    const inputs = [...document.querySelectorAll(`[data-checkout-field="${name}"]`)];
+    const source = inputs.find(input => input.offsetParent !== null) || inputs[0];
+    return source?.value.trim() || '';
+}
+
+function setCheckoutFieldValue(name, value) {
+    if (!value) return;
+    document.querySelectorAll(`[data-checkout-field="${name}"]`).forEach(input => {
+        if (!input.value.trim()) input.value = value;
+    });
+}
+
+function getCheckoutDetails() {
+    const fallbackName = fullNameForProfile(currentProfile || currentUser || {});
+    setCheckoutFieldValue('customerName', fallbackName);
+
+    return {
+        customerName: getCheckoutFieldValue('customerName') || fallbackName,
+        customerPhone: getCheckoutFieldValue('customerPhone'),
+        deliveryLocation: getCheckoutFieldValue('deliveryLocation'),
+        deliveryNotes: getCheckoutFieldValue('deliveryNotes'),
+        paymentMethod: getSelectedPaymentMethod()
+    };
+}
+
+function validateCheckoutDetails(details) {
+    const requirements = [
+        ['customerName', details.customerName, 'Customer name is required.'],
+        ['customerPhone', details.customerPhone, 'Contact number is required.'],
+        ['deliveryLocation', details.deliveryLocation, 'Delivery location is required.']
+    ];
+    let valid = true;
+
+    requirements.forEach(([name, value, message]) => {
+        const fields = [...document.querySelectorAll(`[data-checkout-field="${name}"]`)];
+        const target = fields.find(field => field.offsetParent !== null) || fields[0];
+        fields.forEach(field => setFieldError(field, ''));
+        if (!String(value || '').trim()) {
+            setFieldError(target, message);
+            valid = false;
+        }
+    });
+
+    if (details.customerPhone && !/^[0-9+\-\s()]{7,20}$/.test(details.customerPhone)) {
+        const phoneField = [...document.querySelectorAll('[data-checkout-field="customerPhone"]')]
+            .find(field => field.offsetParent !== null);
+        setFieldError(phoneField, 'Enter a valid contact number.');
+        valid = false;
+    }
+
+    return valid;
+}
+
+function getPaymentMethodLabel(method) {
+    const labels = {
+        cash_on_delivery: 'Cash on Delivery'
+    };
+
+    return labels[method] || method || '-';
+}
+
+async function confirmCheckoutDetails(details, orderItems) {
+    const subtotal = orderItems.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 1), 0);
+    const itemRows = orderItems.map(item => `
+        <div class="checkout-confirm-item">
+            <span>${escapeHtml(item.product_name)}</span>
+            <strong>${Number(item.quantity || 1)} x ${formatPeso(item.price || 0)}</strong>
+        </div>
+    `).join('');
+
+    if (!window.Swal) {
+        return showAdminConfirm({
+            title: 'Confirm delivery details',
+            message: `Deliver to ${details.customerName}, ${details.deliveryLocation}. Payment: ${getPaymentMethodLabel(details.paymentMethod)}.`,
+            confirmText: 'Place Order',
+            cancelText: 'Review Details',
+            type: 'warning'
+        });
+    }
+
+    const result = await Swal.fire({
+        title: 'Confirm delivery details',
+        icon: 'question',
+        html: `
+            <div class="checkout-confirm">
+                <div class="checkout-confirm-grid">
+                    <div><span>Customer</span><strong>${escapeHtml(details.customerName)}</strong></div>
+                    <div><span>Contact</span><strong>${escapeHtml(details.customerPhone)}</strong></div>
+                    <div class="wide"><span>Delivery Location</span><strong>${escapeHtml(details.deliveryLocation)}</strong></div>
+                    <div><span>Payment Status</span><strong>Pending collection</strong></div>
+                    <div><span>Payment Method</span><strong>${escapeHtml(getPaymentMethodLabel(details.paymentMethod))}</strong></div>
+                    ${details.deliveryNotes ? `<div class="wide"><span>Delivery Notes</span><strong>${escapeHtml(details.deliveryNotes)}</strong></div>` : ''}
+                </div>
+                <div class="checkout-confirm-items">${itemRows}</div>
+                <div class="checkout-confirm-total"><span>Total</span><strong>${formatPeso(subtotal)}</strong></div>
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Place Order',
+        cancelButtonText: 'Review Details',
+        reverseButtons: true,
+        focusCancel: true,
+        buttonsStyling: false,
+        customClass: {
+            popup: 'bsh-swal-popup checkout-confirm-popup',
+            title: 'bsh-swal-title',
+            htmlContainer: 'bsh-swal-text',
+            confirmButton: 'bsh-swal-btn primary',
+            cancelButton: 'bsh-swal-btn secondary'
+        },
+        showClass: { popup: 'swal2-show bsh-swal-show' },
+        hideClass: { popup: 'swal2-hide bsh-swal-hide' }
+    });
+
+    return Boolean(result.isConfirmed);
 }
 
 async function proceedCheckout() {
@@ -4087,8 +4550,15 @@ async function proceedCheckout() {
         price: Number(item.price || 0)
     }));
 
-    const paymentMethod = getSelectedPaymentMethod();
-    const { data: order, error: checkoutError } = await db.checkout(orderItems, { paymentMethod });
+    const checkoutDetails = getCheckoutDetails();
+    if (!validateCheckoutDetails(checkoutDetails)) {
+        return showToast('Please complete customer name, contact number, and delivery location before checkout.', null, 'warning');
+    }
+
+    const confirmed = await confirmCheckoutDetails(checkoutDetails, orderItems);
+    if (!confirmed) return;
+
+    const { data: order, error: checkoutError } = await db.checkout(orderItems, checkoutDetails);
 
     if (checkoutError) return showToast(checkoutError.message);
 
@@ -4099,7 +4569,7 @@ async function proceedCheckout() {
 
     updateUI();
 
-    showToast(`Order ${String(order?.id || '').slice(0, 8)} placed. Payment method: Cash on Delivery.`);
+    showToast(`Order ${String(order?.id || '').slice(0, 8)} placed. Reference: ${order?.payment_reference || 'pending'}.`);
 
     if (document.getElementById('cartSidebar')) {
         document.getElementById('cartSidebar').classList.remove('active');
@@ -4179,16 +4649,20 @@ async function updateAdminPassword(e) {
     }
 }
 
-async function loadAdminAuditLogs() {
+async function loadAdminAuditLogs(triggerButton = null) {
     const tbody = document.getElementById('adminAuditLogsList');
 
     if (!tbody) return;
+
+    setButtonLoading(triggerButton, true, 'Refreshing...');
 
     const { data, error } = await db
         .from('audit_logs')
         .select('id,admin_id,admin_email,action,table_name,record_id,details,created_at')
         .order('created_at', { ascending: false })
         .limit(100);
+
+    setButtonLoading(triggerButton, false);
 
     if (error) {
         tbody.innerHTML = `<tr><td colspan="6">${escapeHtml(error.message)}. Run the updated SQL first.</td></tr>`;
@@ -4208,6 +4682,7 @@ function renderAdminAuditLogs() {
 
     const query = (document.getElementById('adminAuditSearch')?.value || '').toLowerCase().trim();
     const actionFilter = document.getElementById('adminAuditActionFilter')?.value || 'all';
+    const sort = document.getElementById('adminAuditSort')?.value || 'newest';
 
     const logs = auditLogs.filter(log => {
         const matchesAction = actionFilter === 'all' || log.action === actionFilter;
@@ -4221,6 +4696,10 @@ function renderAdminAuditLogs() {
         ].some(value => String(value || '').toLowerCase().includes(query));
 
         return matchesAction && matchesSearch;
+    }).sort((a, b) => {
+        if (sort === 'oldest') return String(a.created_at || '').localeCompare(String(b.created_at || ''));
+        if (sort === 'action-asc') return String(a.action || '').localeCompare(String(b.action || ''));
+        return String(b.created_at || '').localeCompare(String(a.created_at || ''));
     });
 
     if (logs.length === 0) {
@@ -4245,41 +4724,169 @@ function renderAdminAuditLogs() {
     }).join('');
 }
 
-async function loadAdminOrders() {
+function getFilteredAuditLogs() {
+    const query = (document.getElementById('adminAuditSearch')?.value || '').toLowerCase().trim();
+    const actionFilter = document.getElementById('adminAuditActionFilter')?.value || 'all';
+    return auditLogs.filter(log => {
+        const matchesAction = actionFilter === 'all' || log.action === actionFilter;
+        const detailsText = JSON.stringify(log.details || {});
+        const matchesSearch = !query || [
+            log.admin_email,
+            log.action,
+            log.table_name,
+            log.record_id,
+            detailsText
+        ].some(value => String(value || '').toLowerCase().includes(query));
+        return matchesAction && matchesSearch;
+    });
+}
+
+function exportAdminAuditLogs() {
+    const rows = getFilteredAuditLogs();
+    if (!rows.length) return showToast('No audit logs to export.', null, 'warning');
+
+    exportRowsToCsv(
+        `audit-logs-${new Date().toISOString().slice(0, 10)}.csv`,
+        ['Date', 'Admin', 'Action', 'Table', 'Record', 'Details'],
+        rows.map(log => [
+            log.created_at || '',
+            log.admin_email || log.admin_id || '',
+            log.action || '',
+            log.table_name || '',
+            log.record_id || '',
+            JSON.stringify(log.details || {})
+        ])
+    );
+    showToast('Audit export prepared.');
+}
+
+async function loadAdminOrders(triggerButton = null) {
     const tbody = document.getElementById('adminOrdersList');
 
     if (!tbody) return;
 
+    setButtonLoading(triggerButton, true, 'Refreshing...');
+
     const { data, error } = await db
         .from('orders')
-        .select('id,user_id,customer_email,status,payment_method,payment_status,total_amount,created_at')
+        .select('id,user_id,customer_email,customer_name,customer_phone,delivery_location,delivery_notes,status,payment_method,payment_status,payment_reference,total_amount,created_at')
         .order('created_at', { ascending: false })
         .limit(50);
 
+    setButtonLoading(triggerButton, false);
+
     if (error) {
-        tbody.innerHTML = '<tr><td colspan="6">No orders yet. The orders table is ready after you run the updated SQL.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8">No orders yet. The orders table is ready after you run the updated SQL.</td></tr>';
         return;
     }
 
-    if (!data || data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6">No orders yet.</td></tr>';
+    adminOrders = data || [];
+    renderAdminOrders();
+}
+
+function getFilteredAdminOrders() {
+    const query = (document.getElementById('adminOrderSearch')?.value || '').toLowerCase().trim();
+    const statusFilter = document.getElementById('adminOrderStatusFilter')?.value || 'all';
+    const paymentFilter = document.getElementById('adminOrderPaymentFilter')?.value || 'all';
+    const dateFrom = document.getElementById('adminOrderDateFrom')?.value || '';
+    const dateTo = document.getElementById('adminOrderDateTo')?.value || '';
+    const sort = document.getElementById('adminOrderSort')?.value || 'newest';
+
+    return adminOrders.filter(order => {
+        const haystack = [
+            order.id,
+            order.payment_reference,
+            order.customer_name,
+            order.customer_email,
+            order.customer_phone,
+            order.delivery_location,
+            order.delivery_notes,
+            order.status,
+            order.payment_status,
+            getPaymentMethodLabel(order.payment_method)
+        ].join(' ').toLowerCase();
+        const createdDay = order.created_at ? new Date(order.created_at).toISOString().slice(0, 10) : '';
+        const matchesQuery = !query || haystack.includes(query);
+        const matchesStatus = statusFilter === 'all' || String(order.status || '').toLowerCase() === statusFilter;
+        const matchesPayment = paymentFilter === 'all' || String(order.payment_status || '').toLowerCase() === paymentFilter;
+        const matchesFrom = !dateFrom || (createdDay && createdDay >= dateFrom);
+        const matchesTo = !dateTo || (createdDay && createdDay <= dateTo);
+        return matchesQuery && matchesStatus && matchesPayment && matchesFrom && matchesTo;
+    }).sort((a, b) => {
+        if (sort === 'oldest') return String(a.created_at || '').localeCompare(String(b.created_at || ''));
+        if (sort === 'total-desc') return Number(b.total_amount || 0) - Number(a.total_amount || 0);
+        if (sort === 'total-asc') return Number(a.total_amount || 0) - Number(b.total_amount || 0);
+        return String(b.created_at || '').localeCompare(String(a.created_at || ''));
+    });
+}
+
+function renderAdminOrders() {
+    const tbody = document.getElementById('adminOrdersList');
+    if (!tbody) return;
+
+    const rows = getFilteredAdminOrders();
+
+    if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="8">No orders yet.</td></tr>';
         return;
     }
 
-    tbody.innerHTML = data.map(order => {
-        const created = order.created_at ? new Date(order.created_at).toLocaleDateString() : '-';
+    tbody.innerHTML = rows.map(order => {
+        const created = order.created_at ? new Date(order.created_at).toLocaleString() : '-';
+        const paymentStatusClass = String(order.payment_status || '').toLowerCase() === 'paid' ? 'green' : '';
+        const orderStatusClass = ['completed', 'paid', 'complete', 'success'].includes(String(order.status || '').toLowerCase()) ? 'green' : '';
+        const deliveryDetails = [
+            order.delivery_location,
+            order.delivery_notes ? `Notes: ${order.delivery_notes}` : ''
+        ].filter(Boolean).join(' | ');
 
         return `
             <tr>
-                <td>${escapeHtml(String(order.id).slice(0, 8))}</td>
-                <td>${escapeHtml(order.customer_email || order.user_id || '-')}</td>
-                <td><span class="admin-pill green">${escapeHtml(order.status || 'pending')}</span></td>
-                <td>${escapeHtml(order.payment_method === 'cash_on_delivery' ? 'Cash on Delivery' : (order.payment_method || '-'))}<br><span class="admin-soft-text">${escapeHtml(order.payment_status || 'pending')}</span></td>
+                <td>
+                    <strong>${escapeHtml(String(order.id).slice(0, 8).toUpperCase())}</strong><br>
+                    <span class="admin-soft-text">${escapeHtml(order.payment_reference || '-')}</span>
+                </td>
+                <td>
+                    <strong>${escapeHtml(order.customer_name || 'Customer')}</strong><br>
+                    <span class="admin-soft-text">${escapeHtml(order.customer_email || order.user_id || '-')}</span>
+                </td>
+                <td>${escapeHtml(order.customer_phone || '-')}</td>
+                <td class="admin-delivery-cell">${escapeHtml(deliveryDetails || '-')}</td>
+                <td><span class="admin-pill ${orderStatusClass}">${escapeHtml(order.status || 'pending')}</span></td>
+                <td>
+                    ${escapeHtml(getPaymentMethodLabel(order.payment_method))}<br>
+                    <span class="admin-pill ${paymentStatusClass}">${escapeHtml(order.payment_status || 'pending')}</span>
+                </td>
                 <td>${formatPeso(order.total_amount || 0)}</td>
                 <td>${escapeHtml(created)}</td>
             </tr>
         `;
     }).join('');
+}
+
+function exportAdminOrders() {
+    const rows = getFilteredAdminOrders();
+    if (!rows.length) return showToast('No orders to export.', null, 'warning');
+
+    exportRowsToCsv(
+        `orders-${new Date().toISOString().slice(0, 10)}.csv`,
+        ['Order ID', 'Reference', 'Customer', 'Email', 'Phone', 'Delivery', 'Notes', 'Status', 'Payment Method', 'Payment Status', 'Total', 'Created'],
+        rows.map(order => [
+            order.id,
+            order.payment_reference || '',
+            order.customer_name || '',
+            order.customer_email || '',
+            order.customer_phone || '',
+            order.delivery_location || '',
+            order.delivery_notes || '',
+            order.status || '',
+            getPaymentMethodLabel(order.payment_method),
+            order.payment_status || '',
+            order.total_amount || 0,
+            order.created_at || ''
+        ])
+    );
+    showToast('Order export prepared.');
 }
 
 function renderBagLandingPage() {
@@ -4300,10 +4907,17 @@ function renderBagLandingPage() {
 
     if (clearBtn && !clearBtn.dataset.bound) {
         clearBtn.dataset.bound = '1';
-        clearBtn.addEventListener('click', () => {
+        clearBtn.addEventListener('click', async () => {
             if (!requireLoginForTransaction('update your bag')) return;
             if (!cart.length) return showToast('Your bag is already empty.');
-            if (!confirm('Are you sure you want to clear your bag?')) return;
+            const confirmed = await showAdminConfirm({
+                title: 'Clear your bag?',
+                message: 'This will remove every item currently saved in your bag.',
+                confirmText: 'Clear Bag',
+                cancelText: 'Keep Items',
+                danger: true
+            });
+            if (!confirmed) return;
             cart = [];
             saveToStorage();
             saveCustomerBagToDatabase();

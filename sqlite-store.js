@@ -306,6 +306,10 @@ export class SQLiteStore {
         payment_method TEXT NOT NULL DEFAULT 'cash_on_delivery',
         payment_status TEXT NOT NULL DEFAULT 'pending' CHECK (payment_status IN ('pending', 'paid', 'failed', 'refunded')),
         payment_reference TEXT,
+        customer_name TEXT,
+        customer_phone TEXT,
+        delivery_location TEXT,
+        delivery_notes TEXT,
         total_amount REAL NOT NULL DEFAULT 0,
         created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
         updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
@@ -399,6 +403,10 @@ export class SQLiteStore {
     addColumnIfMissing('orders', 'payment_method', `TEXT NOT NULL DEFAULT 'cash_on_delivery'`);
     addColumnIfMissing('orders', 'payment_status', `TEXT NOT NULL DEFAULT 'pending'`);
     addColumnIfMissing('orders', 'payment_reference', 'TEXT');
+    addColumnIfMissing('orders', 'customer_name', 'TEXT');
+    addColumnIfMissing('orders', 'customer_phone', 'TEXT');
+    addColumnIfMissing('orders', 'delivery_location', 'TEXT');
+    addColumnIfMissing('orders', 'delivery_notes', 'TEXT');
   }
 
   seedBaseData() {
@@ -1029,6 +1037,14 @@ export class SQLiteStore {
       if (!allowedPaymentMethods.has(paymentMethod)) {
         return { data: null, error: { message: 'Unsupported payment method' } };
       }
+      const customerName = String(options?.customerName || auth.user.email || 'Customer').trim().slice(0, 160);
+      const customerPhone = String(options?.customerPhone || '').trim().slice(0, 60);
+      const deliveryLocation = String(options?.deliveryLocation || '').trim().slice(0, 500);
+      const deliveryNotes = String(options?.deliveryNotes || '').trim().slice(0, 300) || null;
+
+      if (!customerName) return { data: null, error: { message: 'Customer name is required' } };
+      if (!customerPhone) return { data: null, error: { message: 'Contact number is required' } };
+      if (!deliveryLocation) return { data: null, error: { message: 'Delivery location is required' } };
 
       const createOrder = this.db.transaction(() => {
         const orderId = crypto.randomUUID();
@@ -1036,9 +1052,24 @@ export class SQLiteStore {
         let total = 0;
 
         this.db.prepare(`
-          INSERT INTO orders (id, user_id, customer_email, status, payment_method, payment_status, payment_reference, total_amount, created_at, updated_at)
-          VALUES (?, ?, ?, 'processing', ?, 'pending', ?, 0, ?, ?)
-        `).run(orderId, auth.user.id, auth.user.email, paymentMethod, `COD-${orderId.slice(0, 8).toUpperCase()}`, createdAt, createdAt);
+          INSERT INTO orders (
+            id, user_id, customer_email, status, payment_method, payment_status, payment_reference,
+            customer_name, customer_phone, delivery_location, delivery_notes, total_amount, created_at, updated_at
+          )
+          VALUES (?, ?, ?, 'processing', ?, 'pending', ?, ?, ?, ?, ?, 0, ?, ?)
+        `).run(
+          orderId,
+          auth.user.id,
+          auth.user.email,
+          paymentMethod,
+          `COD-${orderId.slice(0, 8).toUpperCase()}`,
+          customerName,
+          customerPhone,
+          deliveryLocation,
+          deliveryNotes,
+          createdAt,
+          createdAt
+        );
 
         const getProduct = this.db.prepare('SELECT id, name, price, stock, status FROM products WHERE id = ?');
         const decrementStock = this.db.prepare(`

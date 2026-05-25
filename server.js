@@ -258,7 +258,11 @@ app.post('/api/checkout', asyncHandler(async (req, res) => {
   if (!auth?.user) return res.status(401).json({ data: null, error: { message: 'Not authenticated' } });
 
   const result = store.createCheckoutOrder(auth, req.body?.items || [], {
-    paymentMethod: req.body?.paymentMethod || 'cash_on_delivery'
+    paymentMethod: req.body?.paymentMethod || 'cash_on_delivery',
+    customerName: req.body?.customerName || '',
+    customerPhone: req.body?.customerPhone || '',
+    deliveryLocation: req.body?.deliveryLocation || '',
+    deliveryNotes: req.body?.deliveryNotes || ''
   });
   res.status(result.error ? 400 : 200).json(responseFromResult(result));
 }));
