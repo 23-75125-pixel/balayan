@@ -7,4 +7,7 @@ __pycache__
 README.md
 .env
 public/uploads
-data
+data/*
+!data/bsh.sqlite
+!data/bsh.sqlite-wal
+!data/bsh.sqlite-shm
