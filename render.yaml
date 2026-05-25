@@ -1,7 +1,7 @@
 services:
   - type: web
     name: balayan-smashers-hub
-    env: docker
+    runtime: docker
     plan: free
     autoDeploy: true
     dockerfilePath: Dockerfile
@@ -16,6 +16,7 @@ services:
         value: "product-images"
       - key: MAX_UPLOAD_BYTES
         value: "5242880"
-    persistentDisk:
+    disk:
+      name: app-data
       mountPath: /disk
-      sizeGb: 1
+      sizeGB: 1
