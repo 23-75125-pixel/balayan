@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apparel Product — Balayan Smashers Hub</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/assets/css/index.css">
+    <link rel="stylesheet" href="/assets/css/mobile.css">
+</head>
+<body data-page="apparel-detail">
+    <div class="preloader" id="preloader">
+        <div class="loader"></div>
+    </div>
+
+    <header class="header" id="header">
+        <div class="header-top">
+            <div class="container">
+                <div class="header-top-content">
+                    <div class="header-top-left">
+                        <a href="#" class="header-link" id="findStoreBtn"><i class="fas fa-map-marker-alt"></i> Find a Store</a>
+                    </div>
+                    <div class="header-top-right">
+                        <a href="#" class="header-link">Join Us</a>
+                        <span class="divider">|</span>
+                        <a href="#" class="header-link">Log In</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="header-main">
+            <div class="container">
+                <div class="header-content">
+                    <button class="hamburger" id="hamburgerBtn" aria-label="Open menu">
+                        <span></span><span></span><span></span>
+                    </button>
+
+                    <a href="index.html" class="logo">
+                        <img src="/photos/bshlogo.png" alt="Balayan Smashers Hub">
+                    </a>
+
+                    <nav class="nav">
+                        <a href="index.html#home">New & Featured</a>
+                        <a href="sports.html">Sports</a>
+                        <a href="apparel.html">Apparel</a>
+                        <a href="jersey.html">Jersey</a>
+                        <a href="equipments.html">Equipments</a>
+                        <a href="accessories.html">Accessories</a>
+                    </nav>
+
+                    <div class="header-actions">
+                        <div class="search">
+                            <i class="fas fa-search" id="searchIcon"></i>
+                            <input type="text" id="searchInput" placeholder="Search">
+                        </div>
+                        <a href="favorites.html" class="icon-btn" id="wishlistBtn" aria-label="Favorites">
+                            <i class="far fa-heart"></i>
+                            <span class="badge" id="wishlistCount">0</span>
+                        </a>
+                        <a href="bag.html" class="icon-btn" id="cartBtn" aria-label="Bag">
+                            <i class="fas fa-shopping-bag"></i>
+                            <span class="badge" id="cartCount">0</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="mobile-nav" id="mobileNav">
+        <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
+        <div class="mobile-nav-drawer">
+            <div class="mobile-nav-header">
+                <img src="/photos/bshlogo.png" alt="BSH">
+                <button class="mobile-nav-close" id="mobileNavClose"><i class="fas fa-times"></i></button>
+            </div>
+            <nav class="mobile-nav-links">
+                <a href="index.html#home">New & Featured</a>
+                <a href="sports.html">Sports</a>
+                <a href="apparel.html">Apparel</a>
+                <a href="jersey.html">Jersey</a>
+                <a href="equipments.html">Equipments</a>
+                <a href="accessories.html">Accessories</a>
+                <a href="favorites.html">Favorites</a>
+                <a href="bag.html">Bag</a>
+            </nav>
+        </div>
+    </div>
+
+    <main>
+        <section class="apparel-detail-empty" id="apparelDetailEmpty" style="display:none;">
+            <h1>Product not found</h1>
+            <p>This apparel item may have been removed or is not available.</p>
+            <a href="apparel.html">Back to Apparel</a>
+        </section>
+
+        <section class="apparel-detail-page" id="apparelDetailPage" style="display:none;">
+            <div class="apparel-detail-layout">
+                <div class="apparel-detail-gallery">
+                    <div class="apparel-detail-thumbs" id="detailThumbs"></div>
+                    <div class="apparel-detail-main">
+                        <img src="/photos/bshlogo.png" alt="Product image" id="detailMainImage">
+                        <button type="button" class="detail-image-arrow prev" id="detailPrevImage" aria-label="Previous image">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button type="button" class="detail-image-arrow next" id="detailNextImage" aria-label="Next image">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <aside class="apparel-detail-info">
+                    <h1 class="apparel-detail-name" id="detailName">Loading...</h1>
+                    <p class="apparel-detail-subtitle" id="detailSubtitle"></p>
+                    <div class="apparel-detail-price" id="detailPrice">₱0</div>
+
+                    <div class="apparel-detail-row-title">
+                        <span>Select Size</span>
+                        <a href="#" class="apparel-detail-size-guide"><i class="fas fa-ruler-combined"></i> Size Guide</a>
+                    </div>
+                    <div class="apparel-detail-qty-barcode-row" style="display:flex;align-items:flex-start;gap:1rem;flex-wrap:wrap;">
+                        <div class="apparel-detail-qty-wrap">
+                            <div class="apparel-detail-row-title">
+                                <strong>Quantity</strong>
+                            </div>
+                            <div class="detail-qty-control" id="detailQtyControl">
+                                <button type="button" class="detail-qty-btn" id="detailQtyMinus" aria-label="Decrease quantity">−</button>
+                                <span class="detail-qty-value" id="detailQtyValue">1</span>
+                                <button type="button" class="detail-qty-btn" id="detailQtyPlus" aria-label="Increase quantity">+</button>
+                            </div>
+                        </div>
+
+                        <div class="apparel-detail-barcode" id="detailBarcodeArea" style="display:flex;align-items:center;gap:0.75rem;min-width:240px;max-width:100%;">
+                            <svg id="detailBarcodeSvg" aria-hidden="true" width="140" height="40" style="flex-shrink:0;"></svg>
+                            <p class="apparel-detail-barcode-text" style="margin:0;font-size:.95rem;line-height:1.2;">Barcode: <strong id="detailBarcodeValue"></strong></p>
+                        </div>
+                    </div>
+                    <div class="detail-size-grid" id="detailSizes"></div>
+                    <div class="detail-color-grid" id="detailColors" hidden></div>
+
+                    <div class="apparel-detail-actions">
+                        <button type="button" class="detail-add-btn" id="detailAddBagBtn">Add to Bag</button>
+                        <button type="button" class="detail-fav-btn" id="detailFavoriteBtn">Favourite <i class="far fa-heart fav-add-icon" aria-hidden="true"></i></button>
+                    </div>
+
+                    <p class="apparel-detail-desc" id="detailDescription"></p>
+                    <ul class="apparel-detail-meta">
+                        <li>Colour Shown: <span id="detailColorShown"></span></li>
+                        <li>Style: <span id="detailStyle"></span></li>
+                        <li>Stock: <span id="detailStock"></span></li>
+                        <li>Country/Region of Origin: <span id="detailOrigin"></span></li>
+                    </ul>
+                </aside>
+            </div>
+        </section>
+    </main>
+
+    <div class="toast" id="toast"><i class="fas fa-check-circle"></i><span id="toastMessage"></span></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <script src="/config/runtime-config.js"></script>
+    <script type="module" src="/assets/js/main.js"></script>
+</body>
+</html>

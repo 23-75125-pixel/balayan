@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard — Balayan Smashers Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/assets/css/index.css">
+    <link rel="stylesheet" href="/assets/css/mobile.css">
+</head>
+<body class="admin-body">
+    <div class="admin-shell" id="adminDashboard">
+        <aside class="admin-sidebar">
+            <div class="admin-account-card">
+                <div class="admin-account-icon">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <div class="admin-account-info">
+                    <span>Signed in as</span>
+                    <strong id="adminSidebarEmail">Loading...</strong>
+                </div>
+            </div>
+            <div class="admin-nav admin-tabs">
+                <button type="button" class="admin-tab-btn active" data-admin-tab="overview"><i class="fas fa-chart-line"></i> Overview</button>
+                <button type="button" class="admin-tab-btn" data-admin-tab="products"><i class="fas fa-box"></i> Products</button>
+                <button type="button" class="admin-tab-btn" data-admin-tab="customers"><i class="fas fa-users"></i> Customers</button>
+                <button type="button" class="admin-tab-btn" data-admin-tab="crm"><i class="fas fa-address-book"></i> CRM</button>
+                <button type="button" class="admin-tab-btn" data-admin-tab="orders"><i class="fas fa-receipt"></i> Orders</button>
+                <button type="button" class="admin-tab-btn" data-admin-tab="audit"><i class="fas fa-clipboard-list"></i> Audit Log</button>
+                <button type="button" class="admin-tab-btn" data-admin-tab="settings"><i class="fas fa-lock"></i> Admin Settings</button>
+                <a href="index.html"><i class="fas fa-store"></i> View Store</a>
+                <button type="button" id="adminLogoutBtn"><i class="fas fa-sign-out-alt"></i> Log Out</button>
+            </div>
+        </aside>
+
+        <main class="admin-main">
+            <section class="admin-section active" id="adminTabOverview">
+                <section class="admin-cards admin-cards-wide">
+                    <div class="admin-card"><span>Total Products</span><strong id="totalProducts">0</strong></div>
+                    <div class="admin-card"><span>Categories</span><strong id="totalCategories">0</strong></div>
+                    <div class="admin-card"><span>Total Value</span><strong id="totalValue">₱0</strong></div>
+                    <div class="admin-card"><span>Low Stock</span><strong id="lowStockCount">0</strong></div>
+                </section>
+
+                <section class="admin-insights-grid">
+                    <div class="admin-panel admin-insight-panel">
+                        <div class="admin-panel-head slim">
+                            <h3>Fast Moving Items</h3>
+                            <span class="admin-soft-text">Most sold products</span>
+                        </div>
+                        <div class="admin-insight-list" id="adminFastMovingProducts">
+                            <div class="admin-empty">Loading sales data...</div>
+                        </div>
+                    </div>
+
+                    <div class="admin-panel admin-insight-panel">
+                        <div class="admin-panel-head slim">
+                            <h3>Slow Moving Items</h3>
+                            <span class="admin-soft-text">Least sold products</span>
+                        </div>
+                        <div class="admin-insight-list" id="adminSlowMovingProducts">
+                            <div class="admin-empty">Loading sales data...</div>
+                        </div>
+                    </div>
+
+                    <div class="admin-panel admin-insight-panel">
+                        <div class="admin-panel-head slim">
+                            <h3>Low Stock Items</h3>
+                            <span class="admin-soft-text">5 stocks or below</span>
+                        </div>
+                        <div class="admin-insight-list" id="adminLowStockProducts">
+                            <div class="admin-empty">Loading stock data...</div>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <section class="admin-section" id="adminTabProducts">
+                <section class="admin-layout products-only">
+                    <div id="productFormHome"></div>
+                    <div class="admin-panel product-form-panel" id="productFormPanel">
+                        <h3 id="productFormTitle">Add Product</h3>
+                        <form class="admin-form" id="productForm">
+                            <input type="hidden" id="editingProductId">
+                            <input type="hidden" id="editingImagePath">
+                            <label>Product Name
+                                <input type="text" id="productName" required placeholder="Example: Badminton Racket">
+                            </label>
+                            <label>Category
+                                <select id="productCategory" required>
+                                    <option value="sports">Sports</option>
+                                    <option value="apparel">Apparel</option>
+                                    <option value="jersey">Jersey</option>
+                                    <option value="equipments">Equipments</option>
+                                    <option value="accessories">Accessories</option>
+                                </select>
+                            </label>
+                            <label>Subcategory
+                                <select id="productSubcategory" required>
+                                    <option value="">Select subcategory</option>
+                                </select>
+                            </label>
+                            <div class="admin-form-row" id="apparelGenderRow" hidden>
+                                <label>Gender
+                                    <select id="productGender">
+                                        <option value="">Select gender</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                        <option value="Unisex">Unisex</option>
+                                    </select>
+                                </label>
+                                <div class="admin-choice-field">
+                                    <div class="admin-choice-header">
+                                        <span>Sizes</span>
+                                        <small>Select one or more</small>
+                                    </div>
+                                    <div class="admin-chip-grid" id="productSize">
+                                        <label class="admin-choice-chip"><input type="checkbox" value="XS"><span>XS</span></label>
+                                        <label class="admin-choice-chip"><input type="checkbox" value="S"><span>S</span></label>
+                                        <label class="admin-choice-chip"><input type="checkbox" value="M"><span>M</span></label>
+                                        <label class="admin-choice-chip"><input type="checkbox" value="L"><span>L</span></label>
+                                        <label class="admin-choice-chip"><input type="checkbox" value="XL"><span>XL</span></label>
+                                        <label class="admin-choice-chip"><input type="checkbox" value="2XL"><span>2XL</span></label>
+                                        <label class="admin-choice-chip"><input type="checkbox" value="3XL"><span>3XL</span></label>
+                                        <label class="admin-choice-chip"><input type="checkbox" value="4XL"><span>4XL</span></label>
+                                        <label class="admin-choice-chip wide"><input type="checkbox" value="One Size"><span>One Size</span></label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="admin-form-row admin-badminton-section" id="badmintonSpecsSection" hidden>
+                                <div class="admin-choice-field">
+                                    <div class="admin-choice-header">
+                                        <span>Flex Type</span>
+                                        <small>Select one</small>
+                                    </div>
+                                    <div class="admin-chip-grid" id="productBadmintonFlex">
+                                        <label class="admin-choice-chip"><input type="radio" name="productBadmintonFlex" value="Flexible"><span>Flexible</span></label>
+                                        <label class="admin-choice-chip"><input type="radio" name="productBadmintonFlex" value="Medium"><span>Medium</span></label>
+                                        <label class="admin-choice-chip"><input type="radio" name="productBadmintonFlex" value="Stiff"><span>Stiff</span></label>
+                                        <label class="admin-choice-chip wide"><input type="radio" name="productBadmintonFlex" value="Extra Stiff"><span>Extra Stiff</span></label>
+                                    </div>
+                                </div>
+                                <div class="admin-choice-field">
+                                    <div class="admin-choice-header">
+                                        <span>Tension</span>
+                                        <small>Select one</small>
+                                    </div>
+                                    <div class="admin-chip-grid" id="productBadmintonTension">
+                                        <label class="admin-choice-chip wide"><input type="radio" name="productBadmintonTension" value="18–22 lbs"><span>18–22 lbs</span></label>
+                                        <label class="admin-choice-chip wide"><input type="radio" name="productBadmintonTension" value="23–26 lbs"><span>23–26 lbs</span></label>
+                                        <label class="admin-choice-chip wide"><input type="radio" name="productBadmintonTension" value="27–30+ lbs"><span>27–30+ lbs</span></label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="admin-form-row admin-badminton-section" id="badmintonSpecsSectionRowTwo" hidden>
+                                <div class="admin-choice-field">
+                                    <div class="admin-choice-header">
+                                        <span>Grip Size</span>
+                                        <small>Select one</small>
+                                    </div>
+                                    <div class="admin-chip-grid" id="productBadmintonGrip">
+                                        <label class="admin-choice-chip"><input type="radio" name="productBadmintonGrip" value="G1"><span>G1</span></label>
+                                        <label class="admin-choice-chip"><input type="radio" name="productBadmintonGrip" value="G2"><span>G2</span></label>
+                                        <label class="admin-choice-chip"><input type="radio" name="productBadmintonGrip" value="G3"><span>G3</span></label>
+                                        <label class="admin-choice-chip"><input type="radio" name="productBadmintonGrip" value="G4"><span>G4</span></label>
+                                        <label class="admin-choice-chip"><input type="radio" name="productBadmintonGrip" value="G5"><span>G5</span></label>
+                                        <label class="admin-choice-chip"><input type="radio" name="productBadmintonGrip" value="G6"><span>G6</span></label>
+                                        <label class="admin-choice-chip"><input type="radio" name="productBadmintonGrip" value="G7"><span>G7</span></label>
+                                    </div>
+                                </div>
+                                <div class="admin-choice-field">
+                                    <div class="admin-choice-header">
+                                        <span>Weight Class</span>
+                                        <small>Select one</small>
+                                    </div>
+                                    <div class="admin-chip-grid" id="productBadmintonWeight">
+                                        <label class="admin-choice-chip wide"><input type="radio" name="productBadmintonWeight" value="1U"><span>1U · 95–99g</span></label>
+                                        <label class="admin-choice-chip wide"><input type="radio" name="productBadmintonWeight" value="2U"><span>2U · 90–94g</span></label>
+                                        <label class="admin-choice-chip wide"><input type="radio" name="productBadmintonWeight" value="3U"><span>3U · 85–89g</span></label>
+                                        <label class="admin-choice-chip wide"><input type="radio" name="productBadmintonWeight" value="4U"><span>4U · 80–84g</span></label>
+                                        <label class="admin-choice-chip wide"><input type="radio" name="productBadmintonWeight" value="5U"><span>5U · 75–79g</span></label>
+                                        <label class="admin-choice-chip wide"><input type="radio" name="productBadmintonWeight" value="6U"><span>6U · 70–74g</span></label>
+                                        <label class="admin-choice-chip wide"><input type="radio" name="productBadmintonWeight" value="7U"><span>7U · 65–69g</span></label>
+                                        <label class="admin-choice-chip wide"><input type="radio" name="productBadmintonWeight" value="8U"><span>8U · Below 65g</span></label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="admin-form-row">
+                                <div class="admin-choice-field">
+                                    <div class="admin-choice-header">
+                                        <span>Colors</span>
+                                        <small>Select one or more</small>
+                                    </div>
+                                    <div class="admin-chip-grid color-grid" id="productColor">
+                                        <label class="admin-choice-chip"><input type="checkbox" value="Black"><span>Black</span></label>
+                                        <label class="admin-choice-chip"><input type="checkbox" value="White"><span>White</span></label>
+                                        <label class="admin-choice-chip"><input type="checkbox" value="Gray"><span>Gray</span></label>
+                                        <label class="admin-choice-chip"><input type="checkbox" value="Green"><span>Green</span></label>
+                                        <label class="admin-choice-chip"><input type="checkbox" value="Blue"><span>Blue</span></label>
+                                        <label class="admin-choice-chip"><input type="checkbox" value="Red"><span>Red</span></label>
+                                        <label class="admin-choice-chip"><input type="checkbox" value="Yellow"><span>Yellow</span></label>
+                                        <label class="admin-choice-chip"><input type="checkbox" value="Navy"><span>Navy</span></label>
+                                        <label class="admin-choice-chip"><input type="checkbox" value="Pink"><span>Pink</span></label>
+                                        <label class="admin-choice-chip"><input type="checkbox" value="Orange"><span>Orange</span></label>
+                                        <label class="admin-choice-chip"><input type="checkbox" value="Purple"><span>Purple</span></label>
+                                        <label class="admin-choice-chip"><input type="checkbox" value="Brown"><span>Brown</span></label>
+                                    </div>
+                                </div>
+                                <label>Brand
+                                    <input type="text" id="productBrand" placeholder="Optional">
+                                </label>
+                            </div>
+                            <div class="admin-form-row">
+                                <label>SKU
+                                    <input type="text" id="productSku" placeholder="Optional code">
+                                </label>
+                                <div class="admin-form-note" id="productBarcodeInfo" style="font-size:.95rem;color:#333;margin-bottom:1rem;">Barcode will be generated when saved.</div>
+                                <label>
+                                    <span>Variant Note</span>
+                                    <input type="text" id="productVariantNote" placeholder="Optional: regular fit, dri-fit, etc.">
+                                </label>
+                            </div>
+                            <div class="admin-form-row">
+                                <label>Price
+                                    <input type="number" id="productPrice" min="0" step="1" required placeholder="1299">
+                                </label>
+                                <label>Original Price
+                                    <input type="number" id="productOriginalPrice" min="0" step="1" placeholder="Optional">
+                                </label>
+                            </div>
+                            <div class="admin-form-row">
+                                <label>Stock
+                                    <input type="number" id="productStock" min="0" step="1" value="0">
+                                </label>
+                                <label>Status
+                                    <select id="productStatus">
+                                        <option value="active">Active</option>
+                                        <option value="draft">Draft</option>
+                                        <option value="out_of_stock">Out of stock</option>
+                                    </select>
+                                </label>
+                            </div>
+                            <div class="admin-form-row">
+                                <label>Badge
+                                    <select id="productBadge">
+                                        <option value="">None</option>
+                                        <option value="new">New</option>
+                                        <option value="sale">Sale</option>
+                                        <option value="best">Best</option>
+                                    </select>
+                                </label>
+                                <label class="admin-check-label">
+                                    <input type="checkbox" id="productFeatured">
+                                    Featured product
+                                </label>
+                            </div>
+                            <label>Description
+                                <textarea id="productDescription" rows="3" placeholder="Short product details"></textarea>
+                            </label>
+                            <label>Product Photos
+                                <input type="file" id="productImage" accept="image/*" multiple>
+                                <small class="admin-field-hint">You can upload multiple photos. The first photo will be used as the cover image.</small>
+                            </label>
+                            <div class="file-preview" id="filePreview"><span>Image preview</span></div>
+                            <div class="admin-form-actions">
+                                <button class="admin-btn" type="submit" id="saveProductBtn">SAVE PRODUCT</button>
+                                <button class="admin-btn ghost" type="button" id="cancelEditProductBtn" hidden>CANCEL EDIT</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="admin-panel">
+                        <div class="admin-panel-head">
+                            <h3>Product List</h3>
+                            <div class="admin-tools">
+                                <button class="admin-btn add-product-btn" type="button" id="openAddProductModalBtn">
+                                    <i class="fas fa-plus"></i> Add Product
+                                </button>
+                                <button class="admin-btn ghost" type="button" id="selectAllProductsBtn">Select All</button>
+                                <button class="admin-btn danger" type="button" id="deleteSelectedProductsBtn" disabled>
+                                    <i class="fas fa-trash"></i> Delete Selected
+                                </button>
+                                <span class="admin-selected-count" id="selectedProductsCount">No selected products</span>
+                                <input type="search" id="adminProductSearch" placeholder="Search product...">
+                                <select id="adminProductCategoryFilter">
+                                    <option value="all">All categories</option>
+                                    <option value="sports">Sports</option>
+                                    <option value="apparel">Apparel</option>
+                                    <option value="jersey">Jersey</option>
+                                    <option value="equipments">Equipments</option>
+                                    <option value="accessories">Accessories</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="admin-products" id="adminProductsList">
+                            <div class="admin-empty">Loading products...</div>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <section class="admin-section" id="adminTabCustomers">
+                <div class="admin-panel">
+                    <div class="admin-panel-head">
+                        <h3>Customers and Admin Accounts</h3>
+                        <div class="admin-tools">
+                            <input type="search" id="adminCustomerSearch" placeholder="Search customer...">
+                        </div>
+                    </div>
+                    <div class="admin-table-wrap">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Email</th>
+                                    <th>Name</th>
+                                    <th>Role</th>
+                                    <th>Date of Birth</th>
+                                    <th>Created</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminCustomersList">
+                                <tr><td colspan="5">Loading accounts...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+
+
+            <section class="admin-section" id="adminTabCrm">
+                <section class="admin-cards admin-cards-wide">
+                    <div class="admin-card"><span>CRM Contacts</span><strong id="crmTotalContacts">0</strong></div>
+                    <div class="admin-card"><span>VIP Contacts</span><strong id="crmVipContacts">0</strong></div>
+                    <div class="admin-card"><span>Follow Ups</span><strong id="crmFollowUps">0</strong></div>
+                    <div class="admin-card"><span>CRM Revenue</span><strong id="crmRevenue">₱0</strong></div>
+                </section>
+
+                <div class="admin-panel">
+                    <div class="admin-panel-head">
+                        <h3>Customer Relationship Management</h3>
+                        <div class="admin-tools">
+                            <input type="search" id="adminCrmSearch" placeholder="Search contact, email, note...">
+                            <select id="adminCrmStatusFilter">
+                                <option value="all">All statuses</option>
+                                <option value="new">New</option>
+                                <option value="active">Active</option>
+                                <option value="vip">VIP</option>
+                                <option value="follow_up">Follow up</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="admin-table-wrap">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Contact</th>
+                                    <th>Status</th>
+                                    <th>Orders</th>
+                                    <th>Spent</th>
+                                    <th>Last Order</th>
+                                    <th>Notes</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminCrmContactsList">
+                                <tr><td colspan="7">Loading CRM contacts...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+
+            <section class="admin-section" id="adminTabAudit">
+                <div class="admin-panel">
+                    <div class="admin-panel-head">
+                        <h3>Audit Log</h3>
+                        <div class="admin-tools">
+                            <input type="search" id="adminAuditSearch" placeholder="Search action, table, or email...">
+                            <select id="adminAuditActionFilter">
+                                <option value="all">All actions</option>
+                                <option value="create_product">Create Product</option>
+                                <option value="update_product">Update Product</option>
+                                <option value="delete_product">Delete Product</option>
+                                <option value="update_crm_contact">Update CRM Contact</option>
+                                <option value="update_password">Update Password</option>
+                            </select>
+                            <button class="admin-btn ghost" type="button" id="refreshAuditLogsBtn"><i class="fas fa-rotate"></i> Refresh</button>
+                        </div>
+                    </div>
+                    <p class="admin-soft-text">This saves admin actions in the <strong>audit_logs</strong> table in Supabase.</p>
+                    <div class="admin-table-wrap">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Admin</th>
+                                    <th>Action</th>
+                                    <th>Table</th>
+                                    <th>Record</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminAuditLogsList">
+                                <tr><td colspan="6">Loading audit logs...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section class="admin-section" id="adminTabSettings">
+                <div class="admin-layout single">
+                    <div class="admin-panel">
+                        <h3>Update Admin Password</h3>
+                        <p class="admin-soft-text">This changes the logged-in admin password in Supabase Auth and saves an audit log record.</p>
+                        <form class="admin-form" id="adminPasswordForm">
+                            <label>New Password
+                                <div class="admin-password-wrap">
+                                    <input type="password" id="adminNewPassword" required minlength="6" placeholder="Enter new password">
+                                    <button type="button" class="admin-password-toggle" data-target="adminNewPassword" aria-label="Show password"><i class="fas fa-eye"></i></button>
+                                </div>
+                            </label>
+                            <label>Confirm New Password
+                                <div class="admin-password-wrap">
+                                    <input type="password" id="adminConfirmPassword" required minlength="6" placeholder="Confirm new password">
+                                    <button type="button" class="admin-password-toggle" data-target="adminConfirmPassword" aria-label="Show password"><i class="fas fa-eye"></i></button>
+                                </div>
+                            </label>
+                            <div class="admin-form-actions">
+                                <button class="admin-btn" type="submit" id="updateAdminPasswordBtn">UPDATE PASSWORD</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <section class="admin-section" id="adminTabOrders">
+                <div class="admin-panel">
+                    <div class="admin-panel-head">
+                        <h3>Orders</h3>
+                        <span class="admin-soft-text">Ready for checkout/order records.</span>
+                    </div>
+                    <div class="admin-table-wrap">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Order</th>
+                                    <th>Customer</th>
+                                    <th>Status</th>
+                                    <th>Payment</th>
+                                    <th>Total</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminOrdersList">
+                                <tr><td colspan="6">Loading orders...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage"></span>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/config/runtime-config.js"></script>
+    <script type="module" src="/assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bag — Balayan Smashers Hub</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    
+    <link rel="stylesheet" href="/assets/css/index.css">
+    <link rel="stylesheet" href="/assets/css/mobile.css">
+</head>
+<body>
+    
+    <!-- Preloader -->
+    <div class="preloader" id="preloader">
+        <div class="loader"></div>
+    </div>
+
+    <!-- Store Locator Sidebar -->
+    <div class="store-locator-sidebar" id="storeLocatorSidebar">
+        <div class="store-overlay"></div>
+        <div class="store-panel">
+            <div class="store-header">
+                <h2><i class="fas fa-map-marker-alt"></i> Find Us Here</h2>
+                <button class="store-close" id="closeStoreLocator">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="store-body">
+                <div class="store-info">
+                    <div class="store-details">
+                        <h3>Balayan Smashers Hub</h3>
+                        <p class="store-address">Brims, Balayan, 4213 Batangas</p>
+                        <p class="store-rating">
+                            <span class="stars">★★★★★</span>
+                            <span>4213 Ratings</span>
+                        </p>
+                    </div>
+                    
+                    <div class="store-map" id="storeMap">
+        <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3872.246330340644!2d120.72767017536695!3d13.943933286468244!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33bda3002328a353%3A0x78e382a94d1a948e!2sBalayan%20Smasher%E2%80%99s%20Hub!5e0!3m2!1sen!2sph!4v1770983490564!5m2!1sen!2sph"
+            width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade">
+        </iframe>
+        </div>
+        
+        <div class="store-actions">
+            <a href="https://www.google.com/maps/dir//Balayan+Smashers+Hub" target="_blank" class="btn-directions">
+                <i class="fas fa-directions"></i> Get Directions
+            </a>
+            <a href="https://www.google.com/maps/search/?api=1&query=Balayan+Smasher's+Hub&query_place_id=ChIJU6MoAjOtO0wRjpQadKKOPng"
+                target="_blank" class="btn-google-maps">
+                <i class="fas fa-map"></i> Open in Google Maps
+            </a>
+        </div>
+                    
+                    <div class="store-hours">
+                        <h4><i class="fas fa-clock"></i> Store Hours</h4>
+                        <div class="hours-list">
+                            <div class="hours-item">
+                                <span class="day">Monday - Sunday:</span>
+                                <span class="time">9:00 AM - 8:00 PM</span>
+                            </div>
+                        </div>
+                        <p class="hours-note">We're open every day to serve your sports equipment needs!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Sidebar -->
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-overlay"></div>
+        <div class="cart-panel">
+            <div class="cart-header">
+                <h2>Bag</h2>
+                <button class="cart-close" id="closeCart">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="cart-body" id="cartItems"></div>
+            <div class="cart-footer">
+                <div class="cart-summary">
+                    <div class="summary-item">
+                        <span>Subtotal</span>
+                        <span id="cartSubtotal">₱0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Shipping</span>
+                        <span>Free</span>
+                    </div>
+                    <div class="summary-item total">
+                        <span>Total</span>
+                        <span id="cartTotal">₱0</span>
+                    </div>
+                </div>
+                <button class="btn-checkout">Checkout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Nav Drawer -->
+    <div class="mobile-nav" id="mobileNav">
+        <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
+        <div class="mobile-nav-drawer">
+            <div class="mobile-nav-header">
+                <img src="/photos/bshlogo.png" alt="BSH">
+                <button class="mobile-nav-close" id="mobileNavClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="mobile-nav-links">
+                <a href="index.html#home"><i class="fas fa-star"></i> New &amp; Featured</a>
+                <a href="sports.html"><i class="fas fa-running"></i> Sports</a>
+                <a href="index.html#collection"><i class="fas fa-store"></i> Shop</a>
+                <a href="apparel.html"><i class="fas fa-tshirt"></i> Apparel</a>
+                <a href="jersey.html"><i class="fas fa-futbol"></i> Jersey</a>
+                <a href="equipments.html"><i class="fas fa-dumbbell"></i> Equipment</a>
+                <a href="accessories.html"><i class="fas fa-tag"></i> Accessories</a>
+                <div class="mobile-nav-divider"></div>
+                <a href="index.html#about"><i class="fas fa-info-circle"></i> About</a>
+                <div class="mobile-nav-divider"></div>
+                <a href="favorites.html"><i class="far fa-heart fav-add-icon" aria-hidden="true"></i> Favorites</a>
+            </div>
+            <div class="mobile-nav-footer">
+                <a href="#" id="mobileStoreBtnLink"><i class="fas fa-map-marker-alt"></i> Find a Store</a>
+                <a href="#"><i class="fas fa-question-circle"></i> Help</a>
+                <div class="mobile-nav-divider"></div>
+                <a href="#" id="mobileJoinLink"><i class="fas fa-user-plus"></i> Join Us</a>
+                <a href="#" id="mobileLoginLink"><i class="fas fa-sign-in-alt"></i> Log In</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header" id="header">
+        <div class="header-top">
+            <div class="container">
+                <div class="header-top-content">
+                    <div class="header-top-left">
+                        <a href="#" class="header-link" id="findStoreBtn">Find a Store</a>
+                        <span class="divider">|</span>
+                        <a href="#" class="header-link">Help</a>
+                    </div>
+                    <div class="header-top-right">
+                        <a href="#" class="header-link" id="joinHeaderLink">Join Us</a>
+                        <span class="divider">|</span>
+                        <a href="#" class="header-link" id="loginHeaderLink">Log In</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="header-main">
+            <div class="container">
+                <div class="header-content">
+                    <button class="hamburger" id="hamburgerBtn" aria-label="Open menu">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                    <a href="index.html" class="logo" style="text-decoration:none;">
+                        <img src="/photos/bshlogo.png" alt="BSH">
+                    </a>
+                    <nav class="nav">
+                        <a href="index.html#home">New & Featured</a>
+                        <a href="sports.html">Sports</a>
+                        <a href="index.html#collection">Shop</a>
+                        <a href="apparel.html">Apparel</a>
+                        <a href="index.html#about">About</a>
+                    </nav>
+                    <div class="header-actions">
+                        <div class="search">
+                            <i class="fas fa-search"></i>
+                            <input type="text" placeholder="Search" id="searchInput">
+                        </div>
+                        <a href="favorites.html" class="icon-btn" id="wishlistBtn" style="text-decoration:none;">
+                            <i class="far fa-heart"></i>
+                            <span class="badge" id="wishlistCount">0</span>
+                        </a>
+                        <a href="bag.html" class="icon-btn bag-page-active" style="text-decoration:none;">
+                            <i class="fas fa-shopping-bag"></i>
+                            <span class="badge" id="cartCount">0</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Bag Landing Page -->
+    <main class="bag-page" id="bagPage">
+        <section class="bag-content-section">
+            <div class="container bag-layout">
+                <section class="bag-items-panel">
+                    <div class="bag-panel-header">
+                        <div>
+                            <h2>Bag <span id="bagPageCount">0</span></h2>
+                        </div>
+                        <button type="button" class="bag-clear-btn" id="clearBagBtn">
+                            <i class="fas fa-trash-alt"></i> Clear Bag
+                        </button>
+                    </div>
+                    <div class="bag-items-list" id="bagPageItems"></div>
+                </section>
+
+                <aside class="bag-summary-card">
+                    <div class="summary-top">
+                        <h2>Summary</h2>
+                    </div>
+
+                    <div class="bag-summary-lines">
+                        <div class="bag-summary-line">
+                            <span>Subtotal</span>
+                            <strong id="bagPageSubtotal">₱0</strong>
+                        </div>
+                        <div class="bag-summary-line">
+                            <span>Delivery</span>
+                            <strong>Free</strong>
+                        </div>
+                        <div class="bag-summary-line muted">
+                            <span>Estimated tax</span>
+                            <strong>Included</strong>
+                        </div>
+                    </div>
+
+                    <div class="bag-total-line">
+                        <span>Total</span>
+                        <strong id="bagPageTotal">₱0</strong>
+                    </div>
+
+                    <div class="payment-method-panel">
+                        <div class="payment-method-title">
+                            <i class="fas fa-money-bill-wave"></i>
+                            Payment Method
+                        </div>
+                        <label class="payment-method-option">
+                            <input type="radio" name="paymentMethod" value="cash_on_delivery" checked>
+                            <span>
+                                <strong>Cash on Delivery</strong>
+                                <small>No payment gateway fees. Pay when your order arrives.</small>
+                            </span>
+                        </label>
+                    </div>
+
+                    <button type="button" class="bag-checkout-btn btn-checkout">
+                        Proceed to Checkout
+                    </button>
+
+                    <div class="bag-benefits">
+                        <div><i class="fas fa-shield-alt"></i><span>Login required before bag, checkout, and order actions</span></div>
+                        <div><i class="fas fa-truck"></i><span>Free Cash on Delivery payment option</span></div>
+                        <div><i class="fas fa-sync-alt"></i><span>Quantity and variant changes update instantly</span></div>
+                    </div>
+                </aside>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-col">
+                    <h4>Get Help</h4>
+                    <a href="#">Order Status</a>
+                    <a href="#">Delivery</a>
+                    <a href="#">Returns</a>
+                    <a href="#">Payment Options</a>
+                    <a href="#">Contact Us</a>
+                </div>
+                <div class="footer-col">
+                    <h4>About BSH</h4>
+                    <a href="#">News</a>
+                    <a href="#">Careers</a>
+                    <a href="#">Investors</a>
+                    <a href="#">Sustainability</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Shop</h4>
+                    <a href="#">Basketball</a>
+                    <a href="#">Badminton</a>
+                    <a href="#">Pickleball</a>
+                </div>
+                <div class="footer-col social-col">
+                    <div class="social-container">
+                        <a href="https://www.facebook.com/profile.php?id=61568764601280" class="icon icon-facebook">
+                            <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"></path>
+                            </svg>
+                        </a>
+                        <a href="https://www.instagram.com/balayansmashershub?igsh=MTB0cDhkaGpydmxoMA==" class="icon icon-instagram">
+                            <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"></path>
+                            </svg>
+                        </a>
+                        <a href="#" class="icon icon-twitter">
+                            <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"></path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <div class="footer-bottom-left">
+                    <span><i class="fas fa-map-marker-alt"></i> Balayan, Batangas, Philippines</span>
+                    <p>© 2024 Balayan Smashers Hub. All Rights Reserved.</p>
+                </div>
+                <div class="footer-bottom-right">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Use</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scroll to Top -->
+    <button class="scroll-top" id="scrollTop">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+
+    <!-- Toast -->
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage"></span>
+    </div>
+
+    <!-- Login/Signup Panel -->
+    <div class="auth-panel" id="authPanel">
+        <div class="auth-overlay"></div>
+        <div class="auth-container">
+            <button class="auth-close" id="closeAuth">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <!-- Login Form -->
+            <div class="auth-form" id="loginForm">
+                <div class="auth-header">
+                    <img src="/photos/bshlogo.png" alt="BSH" class="auth-logo">
+                    <h2>YOUR ACCOUNT FOR EVERYTHING</h2>
+                    <p>Log in to access your account</p>
+                </div>
+                
+                <form class="form" id="loginFormSubmit">
+                    <div class="form-group">
+                        <input type="email" class="form-input" id="loginEmail" name="email" placeholder="Email address" required>
+                    </div>
+                    <div class="form-group">
+                        <div class="password-wrap"><input type="password" class="form-input" id="loginPassword" name="password" placeholder="Password" required><button type="button" class="password-toggle" data-target="loginPassword" aria-label="Show password"><i class="far fa-eye"></i></button></div>
+                    </div>
+                    
+                    <div class="form-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox">
+                            <span>Keep me signed in</span>
+                        </label>
+                        <a href="forgot-password.html" class="link-text">Forgot password?</a>
+                    </div>
+                    
+                    <button type="submit" class="btn-auth">SIGN IN</button>
+                    
+                    <div class="form-footer">
+                        <p>Not a member? <a href="#" class="link-text" id="showSignup">Join Us</a></p>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Signup Form -->
+            <div class="auth-form hidden" id="signupForm">
+                <div class="auth-header">
+                    <img src="/photos/bshlogo.png" alt="BSH" class="auth-logo">
+                    <h2>BECOME A MEMBER</h2>
+                    <p>Create your account to get started</p>
+                </div>
+                
+                <form class="form" id="signupFormSubmit">
+                    <div class="form-group">
+                        <input type="email" class="form-input" id="signupEmail" name="email" placeholder="Email address" required>
+                    </div>
+                    <div class="form-group">
+                        <div class="password-wrap"><input type="password" class="form-input" id="signupPassword" name="password" placeholder="Password" required><button type="button" class="password-toggle" data-target="signupPassword" aria-label="Show password"><i class="far fa-eye"></i></button></div>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-input" id="signupFirstName" name="first_name" placeholder="First Name" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-input" id="signupLastName" name="last_name" placeholder="Last Name" required>
+                    </div>
+                    <div class="form-group form-group-date">
+                        <label class="form-label-date">Date of Birth</label>
+                        <div class="custom-date-input" id="customDateInput">
+                            <input type="text" class="form-input" id="dateDisplay" placeholder="Select date" readonly required>
+                            <input type="hidden" id="dateValue" name="dateOfBirth">
+                        </div>
+                    </div>
+                    
+                    <div class="form-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox" required>
+                            <span>I agree to the <a href="#" class="link-text">Terms & Conditions</a></span>
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="btn-auth">JOIN US</button>
+                    
+                    <div class="form-footer">
+                        <p>Already a member? <a href="#" class="link-text" id="showLogin">Log In</a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Calendar Modal -->
+    <div class="calendar-modal" id="calendarModal">
+        <div class="calendar-overlay" id="calendarOverlay"></div>
+        <div class="calendar-container">
+            <div class="calendar-header">
+                <h3>Select Date of Birth</h3>
+                <button class="calendar-close" id="calendarClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="calendar-body">
+                <div class="calendar-controls">
+                    <button class="calendar-nav-btn" id="prevMonth">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <div class="calendar-month-year">
+                        <button class="calendar-month-btn" id="calendarMonth">August</button>
+                        <button class="calendar-year-btn" id="calendarYear">2026</button>
+                    </div>
+                    <button class="calendar-nav-btn" id="nextMonth">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+                
+                <!-- Month Picker -->
+                <div class="month-picker hidden" id="monthPicker">
+                    <div class="month-picker-grid">
+                        <button class="month-picker-item" data-month="0">Jan</button>
+                        <button class="month-picker-item" data-month="1">Feb</button>
+                        <button class="month-picker-item" data-month="2">Mar</button>
+                        <button class="month-picker-item" data-month="3">Apr</button>
+                        <button class="month-picker-item" data-month="4">May</button>
+                        <button class="month-picker-item" data-month="5">Jun</button>
+                        <button class="month-picker-item" data-month="6">Jul</button>
+                        <button class="month-picker-item" data-month="7">Aug</button>
+                        <button class="month-picker-item" data-month="8">Sep</button>
+                        <button class="month-picker-item" data-month="9">Oct</button>
+                        <button class="month-picker-item" data-month="10">Nov</button>
+                        <button class="month-picker-item" data-month="11">Dec</button>
+                    </div>
+                </div>
+                
+                <!-- Year Picker -->
+                <div class="year-picker hidden" id="yearPicker">
+                    <div class="year-picker-header">
+                        <span class="year-range" id="yearRange">2020 - 2031</span>
+                    </div>
+                    <div class="year-picker-grid" id="yearPickerGrid">
+                        <!-- Years will be generated by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="calendar-weekdays">
+                    <div class="calendar-weekday">SU</div>
+                    <div class="calendar-weekday">MO</div>
+                    <div class="calendar-weekday">TU</div>
+                    <div class="calendar-weekday">WE</div>
+                    <div class="calendar-weekday">TH</div>
+                    <div class="calendar-weekday">FR</div>
+                    <div class="calendar-weekday">SA</div>
+                </div>
+                <div class="calendar-days" id="calendarDays">
+                    <!-- Days will be generated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/config/runtime-config.js"></script>
+    <script type="module" src="/assets/js/main.js"></script>
+</body>
+</html>

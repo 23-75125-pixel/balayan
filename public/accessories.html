@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accessories — Balayan Smashers Hub</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <link rel="stylesheet" href="/assets/css/index.css">
+
+    <style>
+        /* ── Return to Home Button ── */
+        .return-home-btn {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+            padding: .75rem 1.25rem;
+            background: #111;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            font-size: .875rem;
+            font-weight: 700;
+            text-decoration: none;
+            border-radius: 100px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, .25);
+            transition: background .2s ease, transform .2s ease, box-shadow .2s ease;
+            letter-spacing: .02em;
+        }
+
+        .return-home-btn:hover {
+            background: #17C653;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 28px rgba(23, 198, 83, .35);
+        }
+
+        .return-home-btn i {
+            font-size: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .return-home-btn {
+                bottom: 1.25rem;
+                left: 1.25rem;
+                padding: .65rem 1rem;
+                font-size: .8125rem;
+            }
+        }
+
+        .page-hero {
+            margin-top: 116px;
+            position: relative;
+            height: 420px;
+            overflow: hidden;
+            display: flex;
+            align-items: flex-end;
+        }
+
+        .page-hero-img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .page-hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, .65) 0%, transparent 60%);
+        }
+
+        .page-hero-content {
+            position: relative;
+            z-index: 2;
+            color: #fff;
+            padding: 0 2rem 3rem;
+            width: 100%;
+        }
+
+        .breadcrumb {
+            display: flex;
+            gap: .5rem;
+            align-items: center;
+            font-size: .8125rem;
+            font-weight: 500;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            opacity: .8;
+        }
+
+        .breadcrumb a {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            opacity: .7;
+        }
+
+        .breadcrumb span {
+            opacity: .5;
+        }
+
+        .page-hero-content h1 {
+            font-size: 3.5rem;
+            font-weight: 900;
+            letter-spacing: -.03em;
+            line-height: 1;
+        }
+
+        .page-hero-content p {
+            font-size: 1.0625rem;
+            max-width: 480px;
+            margin-top: .75rem;
+            opacity: .85;
+        }
+
+        @media (max-width: 768px) {
+            .page-hero {
+                height: 280px;
+            }
+
+            .page-hero-content h1 {
+                font-size: 2.25rem;
+            }
+        }
+
+        .filter-bar {
+            position: sticky;
+            top: 116px;
+            z-index: 90;
+            background: #fff;
+            border-bottom: 1px solid #EEEEEE;
+            padding: 1rem 0;
+        }
+
+        .filter-bar-inner {
+            max-width: 1344px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-count {
+            font-size: .875rem;
+            color: #757575;
+            white-space: nowrap;
+        }
+
+        .filter-chips {
+            display: flex;
+            gap: .5rem;
+            flex-wrap: wrap;
+        }
+
+        .chip {
+            padding: .375rem 1rem;
+            border: 1px solid #E0E0E0;
+            border-radius: 100px;
+            font-size: .8125rem;
+            font-weight: 500;
+            background: none;
+            cursor: pointer;
+            transition: all .2s ease;
+            color: #424242;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .chip:hover,
+        .chip.active {
+            background: #111;
+            border-color: #111;
+            color: #fff;
+        }
+
+        .sort-select {
+            border: 1px solid #E0E0E0;
+            border-radius: 100px;
+            padding: .375rem 1rem;
+            font-size: .8125rem;
+            font-weight: 500;
+            color: #424242;
+            background: none;
+            cursor: pointer;
+            outline: none;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .shop-section {
+            padding: 3rem 0 5rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 5rem 1rem;
+            color: #9E9E9E;
+            display: none;
+        }
+
+        .empty-state i {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            opacity: .25;
+        }
+
+        .empty-state p {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .product-badge {
+            position: absolute;
+            top: .75rem;
+            left: .75rem;
+            padding: .25rem .6rem;
+            font-size: .65rem;
+            font-weight: 800;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            border-radius: 4px;
+        }
+
+        .product-badge.sale {
+            background: #FF0000;
+            color: #fff;
+        }
+
+        .product-badge.new {
+            background: #17C653;
+            color: #fff;
+        }
+
+        .acc-tag {
+            display: inline-block;
+            font-size: .7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            background: #F5F5F5;
+            color: #616161;
+            padding: .15rem .5rem;
+            border-radius: 4px;
+            margin-bottom: .4rem;
+        }
+
+        /* Color swatches */
+        .color-row {
+            display: flex;
+            gap: .375rem;
+            margin-bottom: .5rem;
+        }
+
+        .color-swatch {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 1.5px solid #ddd;
+            cursor: pointer;
+            transition: transform .2s;
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.25);
+            border-color: #111;
+        }
+    </style>
+
+    <link rel="stylesheet" href="/assets/css/mobile.css">
+</head>
+
+<body data-page-category="accessories">
+
+    <div class="preloader" id="preloader">
+        <div class="loader"></div>
+    </div>
+
+    <!-- Cart Sidebar -->
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-overlay"></div>
+        <div class="cart-panel">
+            <div class="cart-header">
+                <h2>Bag</h2>
+                <button class="cart-close" id="closeCart"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="cart-body" id="cartItems"></div>
+            <div class="cart-footer">
+                <div class="cart-summary">
+                    <div class="summary-item"><span>Subtotal</span><span id="cartSubtotal">₱0</span></div>
+                    <div class="summary-item"><span>Shipping</span><span>Free</span></div>
+                    <div class="summary-item total"><span>Total</span><span id="cartTotal">₱0</span></div>
+                </div>
+                <button class="btn-checkout">Checkout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Nav Drawer -->
+    <div class="mobile-nav" id="mobileNav">
+        <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
+        <div class="mobile-nav-drawer">
+            <div class="mobile-nav-header">
+                <a href="index.html"><img src="/photos/bshlogo.png" alt="BSH"></a>
+                <button class="mobile-nav-close" id="mobileNavClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="mobile-nav-links">
+                <a href="index.html#home"><i class="fas fa-star"></i> New &amp; Featured</a>
+                <a href="sports.html"><i class="fas fa-running"></i> Sports</a>
+                <a href="index.html#collection"><i class="fas fa-store"></i> Shop</a>
+                <a href="apparel.html"><i class="fas fa-tshirt"></i> Apparel</a>
+                <a href="jersey.html"><i class="fas fa-futbol"></i> Jersey</a>
+                <a href="equipments.html"><i class="fas fa-dumbbell"></i> Equipment</a>
+                <a href="accessories.html"><i class="fas fa-tag"></i> Accessories</a>
+                <div class="mobile-nav-divider"></div>
+                <a href="index.html#about"><i class="fas fa-info-circle"></i> About</a>
+            </div>
+            <div class="mobile-nav-footer">
+                <a href="index.html"><i class="fas fa-home"></i> Home</a>
+                <a href="#"><i class="fas fa-question-circle"></i> Help</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header" id="header">
+        <div class="header-top">
+            <div class="container">
+                <div class="header-top-content">
+                    <div class="header-top-left">
+                        <a href="index.html" class="header-link">Home</a>
+                        <span class="divider">|</span>
+                        <a href="#" class="header-link">Help</a>
+                    </div>
+                    <div class="header-top-right">
+                        <a href="#" class="header-link">Join Us</a>
+                        <span class="divider">|</span>
+                        <a href="#" class="header-link">Log In</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="header-main">
+            <div class="container">
+                <div class="header-content">
+                    <button class="hamburger" id="hamburgerBtn" aria-label="Open menu">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                    <div class="logo">
+                        <a href="index.html"><img src="/photos/bshlogo.png" alt="BSH"></a>
+                    </div>
+                    <nav class="nav">
+                        <a href="index.html#home">New & Featured</a>
+                        <a href="index.html#sports">Sports</a>
+                        <a href="index.html#collection">Shop</a>
+                        <a href="apparel.html">Apparel</a>
+                        <a href="index.html#about">About</a>
+                    </nav>
+                    <div class="header-actions">
+                        <div class="search">
+                            <i class="fas fa-search" id="searchIcon" style="cursor:pointer;"></i>
+                            <input type="text" placeholder="Search" id="searchInput">
+                        </div>
+                        <button class="icon-btn" id="wishlistBtn">
+                            <i class="far fa-heart"></i>
+                            <span class="badge" id="wishlistCount">0</span>
+                        </button>
+                        <a id="cartBtn" href="bag.html" class="icon-btn" style="text-decoration:none;">
+                            <i class="fas fa-shopping-bag"></i>
+                            <span class="badge" id="cartCount">0</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Banner -->
+    <section class="page-hero">
+        <img src="/photos/bshaccessories.jpg" alt="Accessories" class="page-hero-img">
+        <div class="page-hero-overlay"></div>
+        <div class="container page-hero-content">
+            <div class="breadcrumb">
+                <a href="index.html">Home</a>
+                <span>/</span>
+                <span>Accessories</span>
+            </div>
+            <h1>Accessories</h1>
+            <p>Level up every detail — bags, wristbands, grips, socks, and everything in between.</p>
+        </div>
+    </section>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+        <div class="filter-bar-inner">
+            <span class="filter-count" id="filterCount">0 Products</span>
+            <div class="filter-chips" id="filterChips">
+                <button class="chip active" data-filter="all">All</button>
+                <button class="chip" data-filter="bag">Bags</button>
+                <button class="chip" data-filter="wrist">Wrist & Grip</button>
+                <button class="chip" data-filter="socks">Socks</button>
+                <button class="chip" data-filter="headwear">Headwear</button>
+                <button class="chip" data-filter="protection">Protection</button>
+            </div>
+            <select class="sort-select" id="sortSelect">
+                <option value="featured">Featured</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+                <option value="newest">Newest</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Products -->
+    <section class="shop-section">
+        <div class="container">
+            <div class="products-grid" id="productsGrid"></div>
+            <div class="empty-state" id="emptyState">
+                <i class="fas fa-tags"></i>
+                <p>No accessories found for this filter.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-col">
+                    <h4>Get Help</h4>
+                    <a href="#">Order Status</a><a href="#">Delivery</a>
+                    <a href="#">Returns</a><a href="#">Contact Us</a>
+                </div>
+                <div class="footer-col">
+                    <h4>About BSH</h4>
+                    <a href="#">News</a><a href="#">Careers</a><a href="#">Sustainability</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Categories</h4>
+                    <a href="jersey.html">Jersey</a>
+                    <a href="equipments.html">Equipments</a>
+                    <a href="accessories.html">Accessories</a>
+                </div>
+                <div class="footer-col social-col">
+                    <div class="social-container">
+                        <a href="https://www.facebook.com/profile.php?id=61568764601280" class="icon icon-facebook">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                            </svg>
+                        </a>
+                        <a href="https://www.instagram.com/balayansmashershub?igsh=MTB0cDhkaGpydmxoMA=="
+                            class="icon icon-instagram">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <div class="footer-bottom-left">
+                    <span><i class="fas fa-map-marker-alt"></i> Philippines</span>
+                    <p>© 2024 Balayan Smashers Hub. All Rights Reserved.</p>
+                </div>
+                <div class="footer-bottom-right">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Use</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Return to Home -->
+    <a href="index.html" class="return-home-btn">
+        <i class="fas fa-arrow-left"></i> Return to Home
+    </a>
+
+    <button class="scroll-top" id="scrollTop"><i class="fas fa-chevron-up"></i></button>
+    <div class="toast" id="toast"><i class="fas fa-check-circle"></i><span id="toastMessage"></span></div>
+
+    <script>
+        const accProducts = [
+            { id: 301, name: "BSH Sport Backpack Pro", cat: "bag", colors: ["#111", "#17C653", "#0070F3"], price: 1899, originalPrice: null, image: "photos/bshaccessories.jpg", badge: "new", rating: 4.8 },
+            { id: 302, name: "Badminton Racket Bag (6-Pack)", cat: "bag", colors: ["#111", "#FF0000"], price: 1499, originalPrice: 1799, image: "photos/bshaccessories.jpg", badge: "sale", rating: 4.7 },
+            { id: 303, name: "Multi-Sport Drawstring Bag", cat: "bag", colors: ["#111", "#fff", "#17C653"], price: 499, originalPrice: null, image: "photos/bshaccessories.jpg", badge: null, rating: 4.5 },
+            { id: 304, name: "Shoe Bag Durable", cat: "bag", colors: ["#111", "#9E9E9E"], price: 299, originalPrice: 399, image: "photos/bshaccessories.jpg", badge: "sale", rating: 4.4 },
+            { id: 305, name: "Sweat Wristband Pair", cat: "wrist", colors: ["#fff", "#111", "#0070F3"], price: 199, originalPrice: null, image: "photos/bshaccessories.jpg", badge: null, rating: 4.6 },
+            { id: 306, name: "Overgrip Pro (3-pack)", cat: "wrist", colors: ["#fff", "#17C653", "#FF0000"], price: 249, originalPrice: 349, image: "photos/bshaccessories.jpg", badge: "sale", rating: 4.8 },
+            { id: 307, name: "Badminton Grip Tape Premium", cat: "wrist", colors: ["#111", "#0070F3"], price: 149, originalPrice: null, image: "photos/bshaccessories.jpg", badge: null, rating: 4.7 },
+            { id: 308, name: "Wrist Support Brace", cat: "wrist", colors: ["#9E9E9E", "#111"], price: 399, originalPrice: 499, image: "photos/bshaccessories.jpg", badge: "sale", rating: 4.5 },
+            { id: 309, name: "Non-Slip Sport Socks (3-pair)", cat: "socks", colors: ["#fff", "#111", "#17C653"], price: 349, originalPrice: null, image: "photos/bshaccessories.jpg", badge: "new", rating: 4.7 },
+            { id: 310, name: "Compression Ankle Socks", cat: "socks", colors: ["#fff", "#111", "#0070F3"], price: 249, originalPrice: 299, image: "photos/bshaccessories.jpg", badge: "sale", rating: 4.6 },
+            { id: 311, name: "BSH Branded Cap", cat: "headwear", colors: ["#111", "#fff", "#17C653"], price: 699, originalPrice: null, image: "photos/bshaccessories.jpg", badge: "new", rating: 4.5 },
+            { id: 312, name: "Sweat Headband Wide", cat: "headwear", colors: ["#fff", "#0070F3", "#FF0000"], price: 199, originalPrice: null, image: "photos/bshaccessories.jpg", badge: null, rating: 4.4 },
+            { id: 313, name: "Knee Pad Pro Pair", cat: "protection", colors: ["#111", "#9E9E9E"], price: 799, originalPrice: 999, image: "photos/bshaccessories.jpg", badge: "sale", rating: 4.8 },
+            { id: 314, name: "Elbow Support Sleeve", cat: "protection", colors: ["#111", "#9E9E9E"], price: 499, originalPrice: null, image: "photos/bshaccessories.jpg", badge: null, rating: 4.6 },
+            { id: 315, name: "Ankle Brace Support", cat: "protection", colors: ["#fff", "#111"], price: 599, originalPrice: 799, image: "photos/bshaccessories.jpg", badge: "sale", rating: 4.7 },
+            { id: 316, name: "Eye Protection Goggles Sport", cat: "protection", colors: ["#111", "#0070F3", "#FF0000"], price: 899, originalPrice: null, image: "photos/bshaccessories.jpg", badge: "new", rating: 4.5 },
+        ];
+
+        const catLabel = {
+            bag: 'Bags', wrist: 'Wrist & Grip', socks: 'Socks',
+            headwear: 'Headwear', protection: 'Protection'
+        };
+
+        let cart = [];
+        let wishlist = [];
+        let currentFilter = 'all';
+        let currentSort = 'featured';
+
+        function loadFromStorage() {
+            try {
+                cart = JSON.parse(localStorage.getItem('cart')) || [];
+                wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+            } catch (e) { cart = []; wishlist = []; }
+        }
+        function saveToStorage() {
+            localStorage.setItem('cart', JSON.stringify(cart));
+            localStorage.setItem('wishlist', JSON.stringify(wishlist));
+        }
+
+        function requireTransactionLogin(action) {
+            if (window.BSHRequireLoginForTransaction) return window.BSHRequireLoginForTransaction(action);
+            if (localStorage.getItem('bsh.api.token')) return true;
+            cart = [];
+            wishlist = [];
+            saveToStorage();
+            showToast(`Please log in to ${action}.`);
+            setTimeout(() => { window.location.href = 'index.html?login=1'; }, 900);
+            return false;
+        }
+
+        function getFiltered() {
+            let list = accProducts.slice();
+            if (currentFilter !== 'all') list = list.filter(p => p.cat === currentFilter);
+            if (currentSort === 'price-asc') list.sort((a, b) => a.price - b.price);
+            if (currentSort === 'price-desc') list.sort((a, b) => b.price - a.price);
+            if (currentSort === 'newest') list.sort((a, b) => b.id - a.id);
+            return list;
+        }
+
+        function renderProducts(override) {
+            const grid = document.getElementById('productsGrid');
+            const empty = document.getElementById('emptyState');
+            const count = document.getElementById('filterCount');
+            const list = override || getFiltered();
+
+            count.textContent = list.length + ' Product' + (list.length !== 1 ? 's' : '');
+            grid.innerHTML = '';
+
+            if (list.length === 0) { empty.style.display = 'block'; return; }
+            empty.style.display = 'none';
+
+            list.forEach(product => {
+                const inWish = wishlist.find(w => w.id === product.id);
+                const card = document.createElement('div');
+                card.className = 'product-card';
+
+                const swatches = product.colors.map(c =>
+                    `<span class="color-swatch" style="background:${c};" title="${c}"></span>`
+                ).join('');
+
+                card.innerHTML = `
+            <div class="product-image-wrapper">
+                <img src="${product.image}" alt="${product.name}" class="product-image">
+                ${product.badge ? `<div class="product-badge ${product.badge}">${product.badge}</div>` : ''}
+                <button class="wishlist-btn ${inWish ? 'active' : ''}"
+                    onclick="event.stopPropagation(); toggleWishlist(${product.id}, this)">
+                    <i class="fa${inWish ? 's' : 'r'} fa-heart"></i>
+                </button>
+            </div>
+            <div class="product-details">
+                <div class="product-category">${catLabel[product.cat] || product.cat}</div>
+                <span class="acc-tag">${catLabel[product.cat] || product.cat}</span>
+                <h3 class="product-name">${product.name}</h3>
+                <div class="color-row">${swatches}</div>
+                <div class="product-price">
+                    <span class="price">₱${product.price.toLocaleString()}</span>
+                    ${product.originalPrice ? `<span class="original-price">₱${product.originalPrice.toLocaleString()}</span>` : ''}
+                </div>
+                <button class="add-to-cart-btn" onclick="addToCart(${product.id})">Add to Bag</button>
+            </div>`;
+                grid.appendChild(card);
+            });
+        }
+
+        function addToCart(id) {
+            if (!requireTransactionLogin('add items to your bag')) return;
+            const product = accProducts.find(p => p.id === id);
+            if (!product) return;
+            const existing = cart.find(i => i.id === id);
+            if (existing) existing.quantity++;
+            else cart.push({ ...product, quantity: 1 });
+            updateUI();
+            saveToStorage();
+            showToast('Added to bag');
+        }
+
+        function toggleWishlist(id, btn) {
+            if (!requireTransactionLogin('save favorites')) return;
+            const product = accProducts.find(p => p.id === id);
+            if (!product) return;
+            const idx = wishlist.findIndex(i => i.id === id);
+            if (idx > -1) {
+                wishlist.splice(idx, 1);
+                btn.classList.remove('active');
+                btn.innerHTML = '<i class="far fa-heart fav-add-icon" aria-hidden="true"></i>';
+                showToast('Removed from favorites');
+            } else {
+                wishlist.push(product);
+                btn.classList.add('active');
+                btn.innerHTML = '<i class="far fa-heart fav-add-icon" aria-hidden="true"></i>';
+                showToast('Added to favorites');
+            }
+            updateUI();
+            saveToStorage();
+        }
+
+        function updateQuantity(id, change) {
+            if (!requireTransactionLogin('update your bag')) return;
+            const item = cart.find(i => i.id === id);
+            if (!item) return;
+            item.quantity += change;
+            if (item.quantity <= 0) cart = cart.filter(i => i.id !== id);
+            updateUI();
+            saveToStorage();
+        }
+
+        function removeFromCart(id) {
+            if (!requireTransactionLogin('update your bag')) return;
+            cart = cart.filter(i => i.id !== id);
+            updateUI();
+            saveToStorage();
+            showToast('Removed from bag');
+        }
+
+        function updateUI() {
+            document.getElementById('cartCount').textContent = cart.reduce((s, i) => s + i.quantity, 0);
+            document.getElementById('wishlistCount').textContent = wishlist.length;
+            renderCartItems();
+        }
+
+        function renderCartItems() {
+            const cartItems = document.getElementById('cartItems');
+            const subtotalEl = document.getElementById('cartSubtotal');
+            const totalEl = document.getElementById('cartTotal');
+            if (!cartItems) return;
+            if (cart.length === 0) {
+                cartItems.innerHTML = `<div style="text-align:center;padding:3rem 1rem;color:#9E9E9E;">
+            <i class="fas fa-shopping-bag" style="font-size:3rem;margin-bottom:1rem;opacity:.3;"></i>
+            <p style="font-size:.9375rem;font-weight:500;">Your bag is empty</p></div>`;
+                subtotalEl.textContent = '₱0';
+                totalEl.textContent = '₱0';
+                return;
+            }
+            let total = 0;
+            cartItems.innerHTML = '';
+            cart.forEach(item => {
+                const el = document.createElement('div');
+                el.style.cssText = 'display:flex;gap:1rem;padding:1.5rem 0;border-bottom:1px solid #EEE;';
+                el.innerHTML = `
+            <img src="${item.image}" alt="${item.name}" style="width:100px;height:100px;object-fit:cover;background:#F5F5F5;">
+            <div style="flex:1;">
+                <h4 style="font-size:.9375rem;font-weight:600;margin-bottom:.25rem;">${item.name}</h4>
+                <p style="font-size:.75rem;color:#757575;margin-bottom:.5rem;text-transform:uppercase;">${catLabel[item.cat] || item.cat}</p>
+                <p style="font-size:1rem;font-weight:700;margin-bottom:.75rem;">₱${(item.price * item.quantity).toLocaleString()}</p>
+                <div style="display:flex;align-items:center;gap:.75rem;">
+                    <button onclick="updateQuantity(${item.id},-1)" style="width:32px;height:32px;background:#F5F5F5;border:none;border-radius:4px;cursor:pointer;font-weight:600;">-</button>
+                    <span style="font-weight:600;min-width:24px;text-align:center;">${item.quantity}</span>
+                    <button onclick="updateQuantity(${item.id},1)"  style="width:32px;height:32px;background:#F5F5F5;border:none;border-radius:4px;cursor:pointer;font-weight:600;">+</button>
+                    <button onclick="removeFromCart(${item.id})" style="margin-left:auto;background:none;border:none;cursor:pointer;color:#757575;">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            </div>`;
+                cartItems.appendChild(el);
+                total += item.price * item.quantity;
+            });
+            subtotalEl.textContent = `₱${total.toLocaleString()}`;
+            totalEl.textContent = `₱${total.toLocaleString()}`;
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => document.getElementById('preloader').classList.add('hidden'), 800);
+            loadFromStorage();
+            renderProducts();
+            updateUI();
+
+            window.addEventListener('scroll', () => {
+                document.getElementById('header').classList.toggle('scrolled', window.scrollY > 50);
+                document.getElementById('scrollTop').classList.toggle('visible', window.scrollY > 500);
+            });
+
+            const cartBtn = document.getElementById('cartBtn');
+            const closeCart = document.getElementById('closeCart');
+            const cartOverlay = document.querySelector('.cart-overlay');
+            const scrollTop = document.getElementById('scrollTop');
+
+            if (cartBtn) {
+                cartBtn.addEventListener('click', () => document.getElementById('cartSidebar').classList.add('active'));
+            }
+            if (closeCart) {
+                closeCart.addEventListener('click', () => document.getElementById('cartSidebar').classList.remove('active'));
+            }
+            if (cartOverlay) {
+                cartOverlay.addEventListener('click', () => document.getElementById('cartSidebar').classList.remove('active'));
+            }
+            if (scrollTop) {
+                scrollTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+            }
+
+            document.querySelectorAll('.chip').forEach(chip => {
+                chip.addEventListener('click', () => {
+                    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+                    chip.classList.add('active');
+                    currentFilter = chip.dataset.filter;
+                    renderProducts();
+                });
+            });
+
+            document.getElementById('sortSelect').addEventListener('change', e => {
+                currentSort = e.target.value;
+                renderProducts();
+            });
+
+            function doSearch() {
+                const q = document.getElementById('searchInput')?.value.trim();
+                if (q) window.location.href = 'search-results.html?q=' + encodeURIComponent(q);
+            }
+            document.getElementById('searchInput')?.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+            document.getElementById('searchIcon')?.addEventListener('click', doSearch);
+
+            if (typeof gsap !== 'undefined') {
+                gsap.registerPlugin(ScrollTrigger);
+                gsap.from('.page-hero-content', { opacity: 0, y: 40, duration: .8, ease: 'power2.out' });
+            }
+        });
+    </script>
+
+    <script>
+        // Mobile Navigation
+        (function () {
+            function initMobileNav() {
+                var hamburger = document.getElementById('hamburgerBtn');
+                var mobileNav = document.getElementById('mobileNav');
+                var mobileNavClose = document.getElementById('mobileNavClose');
+                var mobileNavOverlay = document.getElementById('mobileNavOverlay');
+                if (!hamburger || !mobileNav) return;
+                function open() { mobileNav.classList.add('open'); hamburger.classList.add('open'); document.body.style.overflow = 'hidden'; }
+                function close() { mobileNav.classList.remove('open'); hamburger.classList.remove('open'); document.body.style.overflow = ''; }
+                hamburger.addEventListener('click', open);
+                if (mobileNavClose) mobileNavClose.addEventListener('click', close);
+                if (mobileNavOverlay) mobileNavOverlay.addEventListener('click', close);
+                document.querySelectorAll('.mobile-nav-links a, .mobile-nav-footer a').forEach(function (a) { a.addEventListener('click', close); });
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMobileNav);
+            } else {
+                initMobileNav();
+            }
+        })();
+    </script>
+
+    <!-- Login/Signup Panel -->
+    <div class="auth-panel" id="authPanel">
+        <div class="auth-overlay"></div>
+        <div class="auth-container">
+            <button class="auth-close" id="closeAuth">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <!-- Login Form -->
+            <div class="auth-form" id="loginForm">
+                <div class="auth-header">
+                    <img src="/photos/bshlogo.png" alt="BSH" class="auth-logo">
+                    <h2>YOUR ACCOUNT FOR EVERYTHING</h2>
+                    <p>Log in to access your account</p>
+                </div>
+                
+                <form class="form" id="loginFormSubmit">
+                    <div class="form-group">
+                        <input type="email" class="form-input" id="loginEmail" name="email" placeholder="Email address" required>
+                    </div>
+                    <div class="form-group">
+                        <div class="password-wrap"><input type="password" class="form-input" id="loginPassword" name="password" placeholder="Password" required><button type="button" class="password-toggle" data-target="loginPassword" aria-label="Show password"><i class="far fa-eye"></i></button></div>
+                    </div>
+                    
+                    <div class="form-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox">
+                            <span>Keep me signed in</span>
+                        </label>
+                        <a href="forgot-password.html" class="link-text">Forgot password?</a>
+                    </div>
+                    
+                    <button type="submit" class="btn-auth">SIGN IN</button>
+                    
+                    <div class="form-footer">
+                        <p>Not a member? <a href="#" class="link-text" id="showSignup">Join Us</a></p>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Signup Form -->
+            <div class="auth-form hidden" id="signupForm">
+                <div class="auth-header">
+                    <img src="/photos/bshlogo.png" alt="BSH" class="auth-logo">
+                    <h2>BECOME A MEMBER</h2>
+                    <p>Create your account to get started</p>
+                </div>
+                
+                <form class="form" id="signupFormSubmit">
+                    <div class="form-group">
+                        <input type="email" class="form-input" id="signupEmail" name="email" placeholder="Email address" required>
+                    </div>
+                    <div class="form-group">
+                        <div class="password-wrap"><input type="password" class="form-input" id="signupPassword" name="password" placeholder="Password" required><button type="button" class="password-toggle" data-target="signupPassword" aria-label="Show password"><i class="far fa-eye"></i></button></div>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-input" id="signupFirstName" name="first_name" placeholder="First Name" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-input" id="signupLastName" name="last_name" placeholder="Last Name" required>
+                    </div>
+                    <div class="form-group form-group-date">
+                        <label class="form-label-date">Date of Birth</label>
+                        <div class="custom-date-input" id="customDateInput">
+                            <input type="text" class="form-input" id="dateDisplay" placeholder="Select date" readonly required>
+                            <input type="hidden" id="dateValue" name="dateOfBirth">
+                        </div>
+                    </div>
+                    
+                    <div class="form-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox" required>
+                            <span>I agree to the <a href="#" class="link-text">Terms & Conditions</a></span>
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="btn-auth">JOIN US</button>
+                    
+                    <div class="form-footer">
+                        <p>Already a member? <a href="#" class="link-text" id="showLogin">Log In</a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Calendar Modal -->
+    <div class="calendar-modal" id="calendarModal">
+        <div class="calendar-overlay" id="calendarOverlay"></div>
+        <div class="calendar-container">
+            <div class="calendar-header">
+                <h3>Select Date of Birth</h3>
+                <button class="calendar-close" id="calendarClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="calendar-body">
+                <div class="calendar-controls">
+                    <button class="calendar-nav-btn" id="prevMonth">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <div class="calendar-month-year">
+                        <button class="calendar-month-btn" id="calendarMonth">August</button>
+                        <button class="calendar-year-btn" id="calendarYear">2026</button>
+                    </div>
+                    <button class="calendar-nav-btn" id="nextMonth">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+                
+                <!-- Month Picker -->
+                <div class="month-picker hidden" id="monthPicker">
+                    <div class="month-picker-grid">
+                        <button class="month-picker-item" data-month="0">Jan</button>
+                        <button class="month-picker-item" data-month="1">Feb</button>
+                        <button class="month-picker-item" data-month="2">Mar</button>
+                        <button class="month-picker-item" data-month="3">Apr</button>
+                        <button class="month-picker-item" data-month="4">May</button>
+                        <button class="month-picker-item" data-month="5">Jun</button>
+                        <button class="month-picker-item" data-month="6">Jul</button>
+                        <button class="month-picker-item" data-month="7">Aug</button>
+                        <button class="month-picker-item" data-month="8">Sep</button>
+                        <button class="month-picker-item" data-month="9">Oct</button>
+                        <button class="month-picker-item" data-month="10">Nov</button>
+                        <button class="month-picker-item" data-month="11">Dec</button>
+                    </div>
+                </div>
+                
+                <!-- Year Picker -->
+                <div class="year-picker hidden" id="yearPicker">
+                    <div class="year-picker-header">
+                        <span class="year-range" id="yearRange">2020 - 2031</span>
+                    </div>
+                    <div class="year-picker-grid" id="yearPickerGrid">
+                        <!-- Years will be generated by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="calendar-weekdays">
+                    <div class="calendar-weekday">SU</div>
+                    <div class="calendar-weekday">MO</div>
+                    <div class="calendar-weekday">TU</div>
+                    <div class="calendar-weekday">WE</div>
+                    <div class="calendar-weekday">TH</div>
+                    <div class="calendar-weekday">FR</div>
+                    <div class="calendar-weekday">SA</div>
+                </div>
+                <div class="calendar-days" id="calendarDays">
+                    <!-- Days will be generated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/config/runtime-config.js"></script>
+    <script type="module" src="/assets/js/main.js"></script>
+</body>
+
+</html>

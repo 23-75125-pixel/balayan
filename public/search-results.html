@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results — Balayan Smashers Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/assets/css/index.css">
+    <link rel="stylesheet" href="/assets/css/mobile.css">
+    <style>
+        .page-header {
+            margin-top: 116px;
+            padding: 2.5rem 0 1.75rem;
+            background: #fff;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .page-header .container {
+            display: flex;
+            flex-direction: column;
+            gap: .35rem;
+        }
+
+        .page-header-label {
+            font-size: .7rem;
+            font-weight: 700;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            color: #bdbdbd;
+        }
+
+        .page-header-title {
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            font-weight: 900;
+            color: #111;
+            line-height: 1;
+            letter-spacing: -.02em;
+            margin: 0;
+        }
+
+        .page-header-title span {
+            color: #17C653;
+        }
+
+        .page-header-query {
+            font-size: .9375rem;
+            color: #9e9e9e;
+            margin-top: .35rem;
+        }
+
+        .page-header-query strong {
+            color: #111;
+        }
+
+        @media (max-width: 768px) {
+            .page-header {
+                margin-top: 62px;
+                padding: 1.75rem 0 1.25rem;
+            }
+        }
+
+        .results-section {
+            padding: 2.5rem 0 6rem;
+            min-height: 60vh;
+            background: #fafafa;
+        }
+
+        .results-topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.75rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .results-count {
+            font-size: .8125rem;
+            font-weight: 600;
+            color: #9e9e9e;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+        }
+
+        .results-count span {
+            color: #111;
+        }
+
+        /* Reuse product-card styles from index.css but override grid */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1.25rem;
+        }
+
+        @media (max-width: 768px) {
+            .results-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: .75rem;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .results-grid {
+                gap: .5rem;
+            }
+        }
+
+        .result-card {
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
+            transition: transform .25s ease, box-shadow .25s ease;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+        }
+
+        .result-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 28px rgba(0, 0, 0, .11);
+        }
+
+        .result-image-wrap {
+            position: relative;
+            aspect-ratio: 1;
+            background: #f5f5f5;
+            overflow: hidden;
+        }
+
+        .result-image-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform .4s ease;
+        }
+
+        .result-card:hover .result-image-wrap img {
+            transform: scale(1.05);
+        }
+
+        .result-badge {
+            position: absolute;
+            top: .625rem;
+            left: .625rem;
+            font-size: .625rem;
+            font-weight: 800;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            padding: .2rem .5rem;
+            border-radius: 4px;
+        }
+
+        .result-badge.sale {
+            background: #f44336;
+            color: #fff;
+        }
+
+        .result-badge.new {
+            background: #17C653;
+            color: #fff;
+        }
+
+        .result-badge.best {
+            background: #FF9800;
+            color: #fff;
+        }
+
+        .result-source-tag {
+            position: absolute;
+            top: .625rem;
+            right: .625rem;
+            background: rgba(0, 0, 0, .55);
+            color: #fff;
+            font-size: .6rem;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            padding: .2rem .45rem;
+            border-radius: 4px;
+            backdrop-filter: blur(4px);
+        }
+
+        .result-body {
+            padding: .875rem 1rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: .3rem;
+            flex: 1;
+            justify-content: space-between;
+        }
+
+        .result-info {
+            display: flex;
+            flex-direction: column;
+            gap: .3rem;
+        }
+
+        .result-cat {
+            font-size: .6875rem;
+            font-weight: 700;
+            color: #17C653;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+        }
+
+        .result-name {
+            font-size: .875rem;
+            font-weight: 700;
+            color: #111;
+            line-height: 1.3;
+        }
+
+        .result-price-row {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            margin-top: .125rem;
+        }
+
+        .result-price {
+            font-size: .9375rem;
+            font-weight: 800;
+            color: #111;
+        }
+
+        .result-original {
+            font-size: .8125rem;
+            color: #bdbdbd;
+            text-decoration: line-through;
+        }
+
+        .result-actions {
+            margin-top: .625rem;
+        }
+
+        .result-add-cart {
+            width: 100%;
+            padding: .625rem;
+            background: #111;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: .8125rem;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: .03em;
+            transition: background .2s ease, transform .15s ease;
+        }
+
+        .result-add-cart:hover {
+            background: #17C653;
+            transform: translateY(-1px);
+        }
+
+        /* Empty state */
+        .results-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 5rem 1rem;
+            gap: 1.25rem;
+        }
+
+        .results-empty-icon {
+            width: 88px;
+            height: 88px;
+            background: #f5f5f5;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.25rem;
+            color: #e0e0e0;
+        }
+
+        .results-empty h3 {
+            font-size: 1.375rem;
+            font-weight: 800;
+            color: #111;
+            letter-spacing: -.01em;
+            margin: 0;
+        }
+
+        .results-empty p {
+            font-size: .9375rem;
+            color: #9e9e9e;
+            max-width: 300px;
+            margin: 0;
+        }
+
+        .btn-shop {
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            padding: .75rem 1.75rem;
+            background: #111;
+            color: #fff;
+            border-radius: 100px;
+            text-decoration: none;
+            font-size: .875rem;
+            font-weight: 700;
+            transition: background .2s ease, transform .2s ease;
+        }
+
+        .btn-shop:hover {
+            background: #17C653;
+            transform: translateY(-2px);
+        }
+
+        /* Search bar in header — bigger on this page */
+        .search-hero {
+            margin-top: .5rem;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            max-width: 480px;
+        }
+
+        .search-hero-wrap {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            background: #f5f5f5;
+            border-radius: 100px;
+            padding: .625rem 1rem;
+            transition: background .2s ease;
+        }
+
+        .search-hero-wrap:focus-within {
+            background: #ececec;
+        }
+
+        .search-hero-wrap i {
+            color: #9e9e9e;
+            font-size: .9375rem;
+            cursor: pointer;
+        }
+
+        .search-hero-wrap input {
+            flex: 1;
+            border: none;
+            background: none;
+            outline: none;
+            font-size: .9375rem;
+            color: #111;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .search-hero-wrap input::placeholder {
+            color: #bdbdbd;
+        }
+
+        .search-hero-btn {
+            padding: .625rem 1.25rem;
+            background: #111;
+            color: #fff;
+            border: none;
+            border-radius: 100px;
+            font-size: .875rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background .2s ease;
+            white-space: nowrap;
+        }
+
+        .search-hero-btn:hover {
+            background: #17C653;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: #111;
+            color: #fff;
+            padding: .875rem 1.25rem;
+            border-radius: 10px;
+            font-size: .875rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: .625rem;
+            z-index: 10000;
+            transform: translateY(120%);
+            opacity: 0;
+            transition: transform .35s cubic-bezier(.4, 0, .2, 1), opacity .35s ease;
+            box-shadow: 0 8px 28px rgba(0, 0, 0, .25);
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast i {
+            color: #17C653;
+        }
+
+        .return-home-btn {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+            padding: .75rem 1.25rem;
+            background: #111;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            font-size: .875rem;
+            font-weight: 700;
+            text-decoration: none;
+            border-radius: 100px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, .25);
+            transition: background .2s ease, transform .2s ease;
+        }
+
+        .return-home-btn:hover {
+            background: #17C653;
+            transform: translateY(-3px);
+        }
+
+        @media (max-width: 768px) {
+            .return-home-btn {
+                bottom: 1.25rem;
+                left: 1.25rem;
+                padding: .65rem 1rem;
+                font-size: .8125rem;
+            }
+        }
+
+        .cart-panel {
+            width: 400px;
+        }
+    </style>
+</head>
+
+<body data-page="search">
+
+    <!-- Preloader -->
+    <div class="preloader" id="preloader">
+        <div class="loader"></div>
+    </div>
+
+    <!-- Cart Sidebar -->
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-overlay"></div>
+        <div class="cart-panel">
+            <div class="cart-header">
+                <h2>Bag</h2>
+                <button class="cart-close" id="closeCart"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="cart-body" id="cartItems"></div>
+            <div class="cart-footer">
+                <div class="cart-summary">
+                    <div class="summary-item"><span>Subtotal</span><span id="cartSubtotal">₱0</span></div>
+                    <div class="summary-item"><span>Shipping</span><span>Free</span></div>
+                    <div class="summary-item total"><span>Total</span><span id="cartTotal">₱0</span></div>
+                </div>
+                <button class="btn-checkout">Checkout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Nav -->
+    <div class="mobile-nav" id="mobileNav">
+        <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
+        <div class="mobile-nav-drawer">
+            <div class="mobile-nav-header">
+                <img src="/photos/bshlogo.png" alt="BSH">
+                <button class="mobile-nav-close" id="mobileNavClose"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="mobile-nav-links">
+                <a href="index.html#home"><i class="fas fa-star"></i> New &amp; Featured</a>
+                <a href="sports.html"><i class="fas fa-running"></i> Sports</a>
+                <a href="index.html#collection"><i class="fas fa-store"></i> Shop</a>
+                <a href="apparel.html"><i class="fas fa-tshirt"></i> Apparel</a>
+                <a href="jersey.html"><i class="fas fa-futbol"></i> Jersey</a>
+                <a href="equipments.html"><i class="fas fa-dumbbell"></i> Equipment</a>
+                <a href="accessories.html"><i class="fas fa-tag"></i> Accessories</a>
+                <div class="mobile-nav-divider"></div>
+                <a href="favorites.html"><i class="far fa-heart fav-add-icon" aria-hidden="true"></i> Favorites</a>
+            </div>
+            <div class="mobile-nav-footer">
+                <a href="index.html#about"><i class="fas fa-info-circle"></i> About</a>
+                <a href="#"><i class="fas fa-question-circle"></i> Help</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header" id="header">
+        <div class="header-top">
+            <div class="container">
+                <div class="header-top-content">
+                    <div class="header-top-left">
+                        <a href="index.html" class="header-link">Home</a>
+                        <span class="divider">|</span>
+                        <a href="#" class="header-link">Help</a>
+                    </div>
+                    <div class="header-top-right">
+                        <a href="#" class="header-link">Join Us</a>
+                        <span class="divider">|</span>
+                        <a href="#" class="header-link">Log In</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="header-main">
+            <div class="container">
+                <div class="header-content">
+                    <button class="hamburger" id="hamburgerBtn" aria-label="Open menu">
+                        <span></span><span></span><span></span>
+                    </button>
+                    <div class="logo">
+                        <a href="index.html"><img src="/photos/bshlogo.png" alt="BSH"></a>
+                    </div>
+                    <nav class="nav">
+                        <a href="index.html#home">New &amp; Featured</a>
+                        <a href="sports.html">Sports</a>
+                        <a href="index.html#collection">Shop</a>
+                        <a href="apparel.html">Apparel</a>
+                        <a href="index.html#about">About</a>
+                    </nav>
+                    <div class="header-actions">
+                        <div class="search">
+                            <i class="fas fa-search" id="searchIcon" style="cursor:pointer;"></i>
+                            <input type="text" placeholder="Search and press Enter" id="searchInput">
+                        </div>
+                        <a href="favorites.html" class="icon-btn" style="text-decoration:none;">
+                            <i class="fas fa-heart" style="color:#f44336;"></i>
+                            <span class="badge" id="wishlistCount">0</span>
+                        </a>
+                        <a href="bag.html" class="icon-btn" style="text-decoration:none;">
+                            <i class="fas fa-shopping-bag"></i>
+                            <span class="badge" id="cartCount">0</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="container">
+            <p class="page-header-label">Search Results</p>
+            <h1 class="page-header-title">Results for <span id="queryDisplay">"..."</span></h1>
+            <!-- Inline search bar so user can refine -->
+            <div class="search-hero">
+                <div class="search-hero-wrap">
+                    <i class="fas fa-search" id="heroSearchIcon"></i>
+                    <input type="text" id="heroSearchInput" placeholder="Search again…">
+                </div>
+                <button class="search-hero-btn" id="heroSearchBtn">Search</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Section -->
+    <section class="results-section">
+        <div class="container">
+            <div class="results-topbar" id="resultsTopbar">
+                <p class="results-count"><span id="resultsCount">0</span> Results</p>
+            </div>
+            <div class="results-grid" id="resultsGrid"></div>
+        </div>
+    </section>
+
+    <!-- Return to Home -->
+    <a href="index.html" class="return-home-btn">
+        <i class="fas fa-arrow-left"></i> Back to Home
+    </a>
+
+    <!-- Scroll to Top -->
+    <button class="scroll-top" id="scrollTop"><i class="fas fa-chevron-up"></i></button>
+
+    <!-- Toast -->
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage"></span>
+    </div>
+
+    <script>
+        // ── ALL PRODUCTS from every page ──────────────────────────────
+        const ALL_PRODUCTS = [
+            // ── Homepage / Script.js products ──
+            { id: 1, name: "Professional Basketball", category: "Basketball", page: "index.html#collection", price: 1299, originalPrice: 1599, image: "photos/basketball.jpg", badge: "sale" },
+            { id: 2, name: "Basketball Shoes Pro", category: "Basketball", page: "index.html#collection", price: 3499, originalPrice: null, image: "photos/basketball.jpg", badge: "new" },
+            { id: 3, name: "Basketball Jersey Elite", category: "Basketball", page: "index.html#collection", price: 899, originalPrice: 1199, image: "photos/basketball.jpg", badge: "sale" },
+            { id: 4, name: "Training Basketball Set", category: "Basketball", page: "index.html#collection", price: 2499, originalPrice: null, image: "photos/basketball.jpg", badge: null },
+            { id: 5, name: "Premium Basketball Backboard", category: "Basketball", page: "index.html#collection", price: 4999, originalPrice: 5999, image: "photos/basketball.jpg", badge: "sale" },
+            { id: 6, name: "Basketball Shorts Pro", category: "Basketball", page: "index.html#collection", price: 699, originalPrice: null, image: "photos/basketball.jpg", badge: "new" },
+            { id: 7, name: "Pro Badminton Racket", category: "Badminton", page: "index.html#collection", price: 2899, originalPrice: 3499, image: "photos/badminton.jpg", badge: "sale" },
+            { id: 8, name: "Badminton Shuttlecock Set", category: "Badminton", page: "index.html#collection", price: 599, originalPrice: null, image: "photos/badminton.jpg", badge: null },
+            { id: 9, name: "Badminton Net Professional", category: "Badminton", page: "index.html#collection", price: 1499, originalPrice: 1899, image: "photos/badminton.jpg", badge: "sale" },
+            { id: 10, name: "Badminton Shoes Elite", category: "Badminton", page: "index.html#collection", price: 2999, originalPrice: null, image: "photos/badminton.jpg", badge: "new" },
+            { id: 11, name: "Badminton Bag Premium", category: "Badminton", page: "index.html#collection", price: 1299, originalPrice: null, image: "photos/badminton.jpg", badge: null },
+            { id: 12, name: "Badminton String Pro", category: "Badminton", page: "index.html#collection", price: 299, originalPrice: 399, image: "photos/badminton.jpg", badge: "sale" },
+            { id: 13, name: "Pickleball Paddle Pro", category: "Pickleball", page: "index.html#collection", price: 1899, originalPrice: 2299, image: "photos/pickleball.jpg", badge: "sale" },
+            { id: 14, name: "Pickleball Set Complete", category: "Pickleball", page: "index.html#collection", price: 3499, originalPrice: null, image: "photos/pickleball.jpg", badge: "new" },
+            { id: 15, name: "Pickleball Balls Premium Pack", category: "Pickleball", page: "index.html#collection", price: 499, originalPrice: 699, image: "photos/pickleball.jpg", badge: "sale" },
+            { id: 16, name: "Pickleball Net System", category: "Pickleball", page: "index.html#collection", price: 2499, originalPrice: null, image: "photos/pickleball.jpg", badge: null },
+            { id: 17, name: "Pickleball Shoes Elite", category: "Pickleball", page: "index.html#collection", price: 2799, originalPrice: 3299, image: "photos/pickleball.jpg", badge: "sale" },
+            { id: 18, name: "Pickleball Bag Luxury", category: "Pickleball", page: "index.html#collection", price: 1599, originalPrice: null, image: "photos/pickleball.jpg", badge: "new" },
+            { id: 19, name: "Tennis Racket Pro", category: "Tennis", page: "index.html#collection", price: 2499, originalPrice: 2999, image: "photos/tennis.jpg", badge: "sale" },
+            { id: 20, name: "Tennis Balls Premium (4-pack)", category: "Tennis", page: "index.html#collection", price: 399, originalPrice: null, image: "photos/tennis.jpg", badge: null },
+            { id: 21, name: "Tennis Shoes Elite Court", category: "Tennis", page: "index.html#collection", price: 3299, originalPrice: 3999, image: "photos/tennis.jpg", badge: "sale" },
+            { id: 22, name: "Tennis Bag Deluxe", category: "Tennis", page: "index.html#collection", price: 1799, originalPrice: null, image: "photos/tennis.jpg", badge: "new" },
+            // ── Jersey ──
+            { id: 101, name: "BSH Basketball Jersey Elite", category: "Jersey", page: "jersey.html", price: 899, originalPrice: 1199, image: "photos/bshjersey.jpg", badge: "sale" },
+            { id: 102, name: "Pro Basketball Team Jersey", category: "Jersey", page: "jersey.html", price: 1099, originalPrice: null, image: "photos/bshjersey.jpg", badge: "new" },
+            { id: 103, name: "Away Game Jersey Set", category: "Jersey", page: "jersey.html", price: 799, originalPrice: 999, image: "photos/bshjersey.jpg", badge: "sale" },
+            { id: 104, name: "Reversible Jersey Pro", category: "Jersey", page: "jersey.html", price: 1299, originalPrice: null, image: "photos/bshjersey.jpg", badge: null },
+            { id: 105, name: "Badminton Performance Jersey", category: "Jersey", page: "jersey.html", price: 749, originalPrice: 999, image: "photos/bshjersey.jpg", badge: "sale" },
+            { id: 106, name: "Badminton Club Jersey Dri-Fit", category: "Jersey", page: "jersey.html", price: 849, originalPrice: null, image: "photos/bshjersey.jpg", badge: "new" },
+            { id: 107, name: "Volleyball Team Jersey V2", category: "Jersey", page: "jersey.html", price: 899, originalPrice: 1099, image: "photos/bshjersey.jpg", badge: "sale" },
+            { id: 108, name: "BSH Signature Sport Jersey", category: "Jersey", page: "jersey.html", price: 999, originalPrice: null, image: "photos/bshjersey.jpg", badge: "new" },
+            { id: 109, name: "Training Jersey Lightweight", category: "Jersey", page: "jersey.html", price: 649, originalPrice: 849, image: "photos/bshjersey.jpg", badge: "sale" },
+            { id: 110, name: "Compression Base-Layer Jersey", category: "Jersey", page: "jersey.html", price: 1199, originalPrice: null, image: "photos/bshjersey.jpg", badge: null },
+            { id: 111, name: "Volleyball Libero Jersey", category: "Jersey", page: "jersey.html", price: 799, originalPrice: null, image: "photos/bshjersey.jpg", badge: null },
+            { id: 112, name: "Badminton Sublimated Jersey", category: "Jersey", page: "jersey.html", price: 1049, originalPrice: 1299, image: "photos/bshjersey.jpg", badge: "sale" },
+            // ── Equipment ──
+            { id: 201, name: "Professional Basketball", category: "Equipment", page: "equipments.html", price: 1299, originalPrice: 1599, image: "photos/bshequ.jpg", badge: "sale" },
+            { id: 202, name: "Basketball Backboard Pro", category: "Equipment", page: "equipments.html", price: 4999, originalPrice: 5999, image: "photos/bshequ.jpg", badge: "sale" },
+            { id: 203, name: "Basketball Ring & Net Set", category: "Equipment", page: "equipments.html", price: 1899, originalPrice: null, image: "photos/bshequ.jpg", badge: "new" },
+            { id: 204, name: "Training Basketball Pump", category: "Equipment", page: "equipments.html", price: 299, originalPrice: null, image: "photos/bshequ.jpg", badge: null },
+            { id: 205, name: "Pro Badminton Racket", category: "Equipment", page: "equipments.html", price: 2899, originalPrice: 3499, image: "photos/bshequ.jpg", badge: "sale" },
+            { id: 206, name: "Badminton Net Professional", category: "Equipment", page: "equipments.html", price: 1499, originalPrice: 1899, image: "photos/bshequ.jpg", badge: "sale" },
+            { id: 207, name: "Badminton Shuttlecock Set (12)", category: "Equipment", page: "equipments.html", price: 599, originalPrice: null, image: "photos/bshequ.jpg", badge: null },
+            { id: 208, name: "Badminton String Pro", category: "Equipment", page: "equipments.html", price: 299, originalPrice: 399, image: "photos/bshequ.jpg", badge: "sale" },
+            { id: 209, name: "Pickleball Paddle Pro", category: "Equipment", page: "equipments.html", price: 1899, originalPrice: 2299, image: "photos/bshequ.jpg", badge: "sale" },
+            { id: 210, name: "Pickleball Net System", category: "Equipment", page: "equipments.html", price: 2499, originalPrice: null, image: "photos/bshequ.jpg", badge: null },
+            { id: 211, name: "Pickleball Balls Premium (4pk)", category: "Equipment", page: "equipments.html", price: 499, originalPrice: 699, image: "photos/bshequ.jpg", badge: "sale" },
+            { id: 212, name: "Volleyball Official Match Ball", category: "Equipment", page: "equipments.html", price: 1599, originalPrice: null, image: "photos/bshequ.jpg", badge: "new" },
+            { id: 213, name: "Volleyball Net Competition", category: "Equipment", page: "equipments.html", price: 2199, originalPrice: 2699, image: "photos/bshequ.jpg", badge: "sale" },
+            { id: 214, name: "Boxing Heavy Bag", category: "Equipment", page: "equipments.html", price: 3499, originalPrice: 3999, image: "photos/bshequ.jpg", badge: "sale" },
+            { id: 215, name: "Boxing Gloves Pro 16oz", category: "Equipment", page: "equipments.html", price: 1299, originalPrice: null, image: "photos/bshequ.jpg", badge: "new" },
+            { id: 216, name: "Speed Rope Bearing Pro", category: "Equipment", page: "equipments.html", price: 599, originalPrice: 799, image: "photos/bshequ.jpg", badge: "sale" },
+            // ── Accessories ──
+            { id: 301, name: "BSH Sport Backpack Pro", category: "Accessories", page: "accessories.html", price: 1899, originalPrice: null, image: "photos/bshaccessories.jpg", badge: "new" },
+            { id: 302, name: "Badminton Racket Bag (6-Pack)", category: "Accessories", page: "accessories.html", price: 1499, originalPrice: 1799, image: "photos/bshaccessories.jpg", badge: "sale" },
+            { id: 303, name: "Multi-Sport Drawstring Bag", category: "Accessories", page: "accessories.html", price: 499, originalPrice: null, image: "photos/bshaccessories.jpg", badge: null },
+            { id: 304, name: "Shoe Bag Durable", category: "Accessories", page: "accessories.html", price: 299, originalPrice: 399, image: "photos/bshaccessories.jpg", badge: "sale" },
+            { id: 305, name: "Sweat Wristband Pair", category: "Accessories", page: "accessories.html", price: 199, originalPrice: null, image: "photos/bshaccessories.jpg", badge: null },
+            { id: 306, name: "Overgrip Pro (3-pack)", category: "Accessories", page: "accessories.html", price: 249, originalPrice: 349, image: "photos/bshaccessories.jpg", badge: "sale" },
+            { id: 307, name: "Badminton Grip Tape Premium", category: "Accessories", page: "accessories.html", price: 149, originalPrice: null, image: "photos/bshaccessories.jpg", badge: null },
+            { id: 308, name: "Wrist Support Brace", category: "Accessories", page: "accessories.html", price: 399, originalPrice: 499, image: "photos/bshaccessories.jpg", badge: "sale" },
+            { id: 309, name: "Non-Slip Sport Socks (3-pair)", category: "Accessories", page: "accessories.html", price: 349, originalPrice: null, image: "photos/bshaccessories.jpg", badge: "new" },
+            { id: 310, name: "Compression Ankle Socks", category: "Accessories", page: "accessories.html", price: 249, originalPrice: 299, image: "photos/bshaccessories.jpg", badge: "sale" },
+            { id: 311, name: "BSH Branded Cap", category: "Accessories", page: "accessories.html", price: 699, originalPrice: null, image: "photos/bshaccessories.jpg", badge: "new" },
+            { id: 312, name: "Sweat Headband Wide", category: "Accessories", page: "accessories.html", price: 199, originalPrice: null, image: "photos/bshaccessories.jpg", badge: null },
+            { id: 313, name: "Knee Pad Pro Pair", category: "Accessories", page: "accessories.html", price: 799, originalPrice: 999, image: "photos/bshaccessories.jpg", badge: "sale" },
+            { id: 314, name: "Elbow Support Sleeve", category: "Accessories", page: "accessories.html", price: 499, originalPrice: null, image: "photos/bshaccessories.jpg", badge: null },
+            { id: 315, name: "Ankle Brace Support", category: "Accessories", page: "accessories.html", price: 599, originalPrice: 799, image: "photos/bshaccessories.jpg", badge: "sale" },
+            { id: 316, name: "Eye Protection Goggles Sport", category: "Accessories", page: "accessories.html", price: 899, originalPrice: null, image: "photos/bshaccessories.jpg", badge: "new" },
+            // ── Apparel ──
+            { id: 401, name: "BSH Dri-Fit Performance Tee", category: "Apparel", page: "apparel.html", price: 699, originalPrice: 899, image: "photos/bshjersey.jpg", badge: "sale" },
+            { id: 402, name: "Compression Base Layer Tee", category: "Apparel", page: "apparel.html", price: 849, originalPrice: null, image: "photos/bshjersey.jpg", badge: "new" },
+            { id: 403, name: "Loose Fit Training Shirt", category: "Apparel", page: "apparel.html", price: 599, originalPrice: 799, image: "photos/bshjersey.jpg", badge: "sale" },
+            { id: 404, name: "Graphic Sport Tee", category: "Apparel", page: "apparel.html", price: 749, originalPrice: null, image: "photos/bshjersey.jpg", badge: null },
+            { id: 405, name: "Women's Fitted Active Tee", category: "Apparel", page: "apparel.html", price: 699, originalPrice: 899, image: "photos/bshjersey.jpg", badge: "sale" },
+            { id: 406, name: "Women's Crop Performance Top", category: "Apparel", page: "apparel.html", price: 799, originalPrice: null, image: "photos/bshjersey.jpg", badge: "new" },
+            { id: 407, name: "Unisex Oversized Sport Tee", category: "Apparel", page: "apparel.html", price: 849, originalPrice: 999, image: "photos/bshjersey.jpg", badge: "best" },
+            { id: 408, name: "Long Sleeve Training Top", category: "Apparel", page: "apparel.html", price: 949, originalPrice: null, image: "photos/bshjersey.jpg", badge: null },
+            { id: 411, name: "BSH 7\" Running Shorts", category: "Apparel", page: "apparel.html", price: 799, originalPrice: 999, image: "photos/bshequ.jpg", badge: "sale" },
+            { id: 412, name: "Compression Training Shorts", category: "Apparel", page: "apparel.html", price: 899, originalPrice: null, image: "photos/bshequ.jpg", badge: "new" },
+            { id: 413, name: "Basketball Shorts Pro", category: "Apparel", page: "apparel.html", price: 699, originalPrice: 899, image: "photos/bshequ.jpg", badge: "sale" },
+            { id: 414, name: "Women's Sport Shorts 3\"", category: "Apparel", page: "apparel.html", price: 749, originalPrice: null, image: "photos/bshequ.jpg", badge: "new" },
+            { id: 415, name: "Women's Biker Shorts", category: "Apparel", page: "apparel.html", price: 849, originalPrice: 1099, image: "photos/bshequ.jpg", badge: "sale" },
+            { id: 416, name: "Woven Training Shorts", category: "Apparel", page: "apparel.html", price: 799, originalPrice: null, image: "photos/bshequ.jpg", badge: null },
+            { id: 441, name: "High-Support Sport Bra", category: "Apparel", page: "apparel.html", price: 999, originalPrice: 1299, image: "photos/bshjersey.jpg", badge: "sale" },
+            { id: 442, name: "Light Support Crop Bra", category: "Apparel", page: "apparel.html", price: 799, originalPrice: null, image: "photos/bshjersey.jpg", badge: "new" },
+            { id: 443, name: "Medium Support Racerback Bra", category: "Apparel", page: "apparel.html", price: 899, originalPrice: 1099, image: "photos/bshjersey.jpg", badge: "sale" },
+            { id: 444, name: "Padded Zip-Front Sport Bra", category: "Apparel", page: "apparel.html", price: 1099, originalPrice: null, image: "photos/bshjersey.jpg", badge: "best" },
+            { id: 445, name: "Seamless Training Bra", category: "Apparel", page: "apparel.html", price: 749, originalPrice: 949, image: "photos/bshjersey.jpg", badge: "sale" },
+            { id: 446, name: "Longline Sports Bra", category: "Apparel", page: "apparel.html", price: 949, originalPrice: null, image: "photos/bshjersey.jpg", badge: "new" },
+        ];
+
+        // ── Shared state ──────────────────────────────────────────────
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+
+        function save() {
+            localStorage.setItem('cart', JSON.stringify(cart));
+            localStorage.setItem('wishlist', JSON.stringify(wishlist));
+        }
+
+        function requireTransactionLogin(action) {
+            if (window.BSHRequireLoginForTransaction) return window.BSHRequireLoginForTransaction(action);
+            if (localStorage.getItem('bsh.api.token')) return true;
+            cart = [];
+            wishlist = [];
+            save();
+            showToast(`Please log in to ${action}.`);
+            setTimeout(() => { window.location.href = 'index.html?login=1'; }, 900);
+            return false;
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            document.getElementById('toastMessage').textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2500);
+        }
+
+        function updateBadges() {
+            document.getElementById('wishlistCount').textContent = wishlist.length;
+            document.getElementById('cartCount').textContent = cart.reduce((s, i) => s + i.quantity, 0);
+        }
+
+        // ── Search & render ───────────────────────────────────────────
+        function doSearch(rawQuery) {
+            const q = rawQuery.trim().toLowerCase();
+            if (!q) return;
+
+            // Update URL so it's shareable / bookmarkable
+            history.replaceState(null, '', `search-results.html?q=${encodeURIComponent(q)}`);
+
+            document.getElementById('queryDisplay').textContent = `"${rawQuery.trim()}"`;
+            document.getElementById('heroSearchInput').value = rawQuery.trim();
+
+            const results = ALL_PRODUCTS.filter(p =>
+                p.name.toLowerCase().includes(q) ||
+                p.category.toLowerCase().includes(q)
+            );
+
+            // Deduplicate by name (same item may appear on multiple pages)
+            const seen = new Set();
+            const unique = results.filter(p => {
+                if (seen.has(p.name.toLowerCase())) return false;
+                seen.add(p.name.toLowerCase());
+                return true;
+            });
+
+            document.getElementById('resultsCount').textContent = unique.length;
+            renderResults(unique);
+        }
+
+        function renderResults(list) {
+            const grid = document.getElementById('resultsGrid');
+            grid.innerHTML = '';
+
+            if (list.length === 0) {
+                grid.innerHTML = `
+            <div style="grid-column:1/-1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:5rem 1rem;gap:1.25rem;">
+                <div style="width:88px;height:88px;background:#f5f5f5;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2.25rem;color:#e0e0e0;">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h3 style="font-size:1.375rem;font-weight:800;color:#111;margin:0;">No results found</h3>
+                <p style="font-size:.9375rem;color:#9e9e9e;max-width:300px;margin:0;">Try a different keyword or browse our categories below.</p>
+                <a href="index.html#collection" class="btn-shop"><i class="fas fa-shopping-bag"></i> Browse All Products</a>
+            </div>`;
+                return;
+            }
+
+            list.forEach((product, idx) => {
+                const card = document.createElement('div');
+                card.className = 'result-card';
+                card.style.cssText = 'opacity:0;transform:translateY(20px);';
+
+                const badge = product.badge ? `<div class="result-badge ${product.badge}">${product.badge}</div>` : '';
+                const origPrice = product.originalPrice ? `<span class="result-original">₱${product.originalPrice.toLocaleString()}</span>` : '';
+                const inWish = wishlist.find(w => w.id === product.id);
+
+                card.innerHTML = `
+            <div class="result-image-wrap">
+                <img src="${product.image}" alt="${product.name}" loading="lazy">
+                ${badge}
+                <div class="result-source-tag">${product.category}</div>
+            </div>
+            <div class="result-body">
+                <div class="result-info">
+                    <div class="result-cat">${product.category}</div>
+                    <div class="result-name">${product.name}</div>
+                    <div class="result-price-row">
+                        <span class="result-price">₱${product.price.toLocaleString()}</span>
+                        ${origPrice}
+                    </div>
+                </div>
+                <div class="result-actions">
+                    <button class="result-add-cart"><i class="fas fa-shopping-bag"></i>&nbsp; Add to Bag</button>
+                </div>
+            </div>`;
+
+                grid.appendChild(card);
+
+                // Animate in
+                setTimeout(() => {
+                    card.style.transition = 'opacity .35s ease, transform .35s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, idx * 50);
+
+                // Click card → go to product page
+                card.addEventListener('click', () => window.location.href = product.page);
+
+                // Add to cart (stop propagation so card click doesn't fire)
+                card.querySelector('.result-add-cart').addEventListener('click', e => {
+                    e.stopPropagation();
+                    if (!requireTransactionLogin('add items to your bag')) return;
+                    const existing = cart.find(i => i.id === product.id);
+                    if (existing) { existing.quantity++; } else { cart.push({ ...product, quantity: 1 }); }
+                    save(); updateBadges(); renderCartItems();
+                    showToast(`${product.name} added to bag`);
+                });
+            });
+        }
+
+        // ── Cart ─────────────────────────────────────────────────────
+        function renderCartItems() {
+            const el = document.getElementById('cartItems');
+            const sub = document.getElementById('cartSubtotal');
+            const tot = document.getElementById('cartTotal');
+            if (!el) return;
+            if (cart.length === 0) {
+                el.innerHTML = `<div style="text-align:center;padding:3rem 1rem;color:#9E9E9E;"><i class="fas fa-shopping-bag" style="font-size:3rem;margin-bottom:1rem;opacity:.3;"></i><p style="font-size:.9375rem;font-weight:500;">Your bag is empty</p></div>`;
+                if (sub) sub.textContent = '₱0';
+                if (tot) tot.textContent = '₱0';
+                return;
+            }
+            el.innerHTML = ''; let total = 0;
+            cart.forEach(item => {
+                const d = document.createElement('div');
+                d.style.cssText = 'display:flex;gap:1rem;padding:1.5rem 0;border-bottom:1px solid #EEE;';
+                d.innerHTML = `
+            <img src="${item.image}" alt="${item.name}" style="width:100px;height:100px;object-fit:cover;background:#F5F5F5;">
+            <div style="flex:1;">
+                <h4 style="font-size:.9375rem;font-weight:600;margin-bottom:.25rem;">${item.name}</h4>
+                <p style="font-size:.75rem;color:#757575;margin-bottom:.5rem;text-transform:uppercase;">${item.category}</p>
+                <p style="font-size:1rem;font-weight:700;margin-bottom:.75rem;">₱${(item.price * item.quantity).toLocaleString()}</p>
+                <div style="display:flex;align-items:center;gap:.75rem;">
+                    <button onclick="updateQty(${item.id},-1)" style="width:32px;height:32px;background:#F5F5F5;border:none;border-radius:4px;cursor:pointer;font-weight:600;">-</button>
+                    <span style="font-weight:600;min-width:24px;text-align:center;">${item.quantity}</span>
+                    <button onclick="updateQty(${item.id},1)" style="width:32px;height:32px;background:#F5F5F5;border:none;border-radius:4px;cursor:pointer;font-weight:600;">+</button>
+                    <button onclick="removeCart(${item.id})" style="margin-left:auto;background:none;border:none;cursor:pointer;color:#757575;font-size:1rem;"><i class="fas fa-trash-alt"></i></button>
+                </div>
+            </div>`;
+                el.appendChild(d); total += item.price * item.quantity;
+            });
+            if (sub) sub.textContent = `₱${total.toLocaleString()}`;
+            if (tot) tot.textContent = `₱${total.toLocaleString()}`;
+        }
+        function updateQty(id, delta) {
+            if (!requireTransactionLogin('update your bag')) return;
+            const item = cart.find(i => i.id === id);
+            if (!item) return;
+            item.quantity += delta;
+            if (item.quantity <= 0) { cart = cart.filter(i => i.id !== id); showToast('Removed from bag'); }
+            save(); updateBadges(); renderCartItems();
+        }
+        function removeCart(id) {
+            if (!requireTransactionLogin('update your bag')) return;
+            cart = cart.filter(i => i.id !== id); save(); updateBadges(); renderCartItems(); showToast('Removed from bag');
+        }
+
+        // ── Boot ─────────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => document.getElementById('preloader')?.classList.add('hidden'), 800);
+
+            // Header scroll
+            const header = document.getElementById('header');
+            window.addEventListener('scroll', () => header?.classList.toggle('scrolled', window.pageYOffset > 50));
+
+            // Mobile nav
+            const hamburger = document.getElementById('hamburgerBtn');
+            const mobileNav = document.getElementById('mobileNav');
+            const navClose = document.getElementById('mobileNavClose');
+            const navOverlay = document.getElementById('mobileNavOverlay');
+            if (hamburger && mobileNav) {
+                const open = () => { mobileNav.classList.add('open'); hamburger.classList.add('open'); document.body.style.overflow = 'hidden'; };
+                const shut = () => { mobileNav.classList.remove('open'); hamburger.classList.remove('open'); document.body.style.overflow = ''; };
+                hamburger.addEventListener('click', open);
+                navClose?.addEventListener('click', shut);
+                navOverlay?.addEventListener('click', shut);
+                mobileNav.querySelectorAll('.mobile-nav-links a,.mobile-nav-footer a').forEach(a => a.addEventListener('click', shut));
+            }
+
+            // Cart
+            const cartBtn = document.getElementById('cartBtn');
+            const closeCart = document.getElementById('closeCart');
+            const cartSidebar = document.getElementById('cartSidebar');
+            cartBtn?.addEventListener('click', () => cartSidebar.classList.add('active'));
+            closeCart?.addEventListener('click', () => cartSidebar.classList.remove('active'));
+            cartSidebar?.querySelector('.cart-overlay')?.addEventListener('click', () => cartSidebar.classList.remove('active'));
+
+            // Scroll to top
+            const scrollBtn = document.getElementById('scrollTop');
+            window.addEventListener('scroll', () => scrollBtn?.classList.toggle('visible', window.pageYOffset > 400));
+            scrollBtn?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+            // Header search (small bar)
+            const headerInput = document.getElementById('searchInput');
+            const headerIcon = document.getElementById('searchIcon');
+            function headerSearch() {
+                const q = headerInput?.value.trim();
+                if (q) window.location.href = `search-results.html?q=${encodeURIComponent(q)}`;
+            }
+            headerInput?.addEventListener('keydown', e => { if (e.key === 'Enter') headerSearch(); });
+            headerIcon?.addEventListener('click', headerSearch);
+
+            // Hero search (big bar)
+            const heroInput = document.getElementById('heroSearchInput');
+            const heroBtn = document.getElementById('heroSearchBtn');
+            const heroIcon = document.getElementById('heroSearchIcon');
+            function heroSearch() {
+                const q = heroInput?.value.trim();
+                if (q) doSearch(q);
+            }
+            heroInput?.addEventListener('keydown', e => { if (e.key === 'Enter') heroSearch(); });
+            heroBtn?.addEventListener('click', heroSearch);
+            heroIcon?.addEventListener('click', heroSearch);
+
+            // Load from URL param
+            const params = new URLSearchParams(window.location.search);
+            const q = params.get('q') || '';
+            if (q) {
+                headerInput.value = q;
+                doSearch(q);
+            } else {
+                document.getElementById('queryDisplay').textContent = '""';
+                document.getElementById('resultsCount').textContent = '0';
+            }
+
+            updateBadges();
+            renderCartItems();
+        });
+    </script>
+
+    <!-- Login/Signup Panel -->
+    <div class="auth-panel" id="authPanel">
+        <div class="auth-overlay"></div>
+        <div class="auth-container">
+            <button class="auth-close" id="closeAuth">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <!-- Login Form -->
+            <div class="auth-form" id="loginForm">
+                <div class="auth-header">
+                    <img src="/photos/bshlogo.png" alt="BSH" class="auth-logo">
+                    <h2>YOUR ACCOUNT FOR EVERYTHING</h2>
+                    <p>Log in to access your account</p>
+                </div>
+                
+                <form class="form" id="loginFormSubmit">
+                    <div class="form-group">
+                        <input type="email" class="form-input" id="loginEmail" name="email" placeholder="Email address" required>
+                    </div>
+                    <div class="form-group">
+                        <div class="password-wrap"><input type="password" class="form-input" id="loginPassword" name="password" placeholder="Password" required><button type="button" class="password-toggle" data-target="loginPassword" aria-label="Show password"><i class="far fa-eye"></i></button></div>
+                    </div>
+                    
+                    <div class="form-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox">
+                            <span>Keep me signed in</span>
+                        </label>
+                        <a href="forgot-password.html" class="link-text">Forgot password?</a>
+                    </div>
+                    
+                    <button type="submit" class="btn-auth">SIGN IN</button>
+                    
+                    <div class="form-footer">
+                        <p>Not a member? <a href="#" class="link-text" id="showSignup">Join Us</a></p>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Signup Form -->
+            <div class="auth-form hidden" id="signupForm">
+                <div class="auth-header">
+                    <img src="/photos/bshlogo.png" alt="BSH" class="auth-logo">
+                    <h2>BECOME A MEMBER</h2>
+                    <p>Create your account to get started</p>
+                </div>
+                
+                <form class="form" id="signupFormSubmit">
+                    <div class="form-group">
+                        <input type="email" class="form-input" id="signupEmail" name="email" placeholder="Email address" required>
+                    </div>
+                    <div class="form-group">
+                        <div class="password-wrap"><input type="password" class="form-input" id="signupPassword" name="password" placeholder="Password" required><button type="button" class="password-toggle" data-target="signupPassword" aria-label="Show password"><i class="far fa-eye"></i></button></div>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-input" id="signupFirstName" name="first_name" placeholder="First Name" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-input" id="signupLastName" name="last_name" placeholder="Last Name" required>
+                    </div>
+                    <div class="form-group form-group-date">
+                        <label class="form-label-date">Date of Birth</label>
+                        <div class="custom-date-input" id="customDateInput">
+                            <input type="text" class="form-input" id="dateDisplay" placeholder="Select date" readonly required>
+                            <input type="hidden" id="dateValue" name="dateOfBirth">
+                        </div>
+                    </div>
+                    
+                    <div class="form-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox" required>
+                            <span>I agree to the <a href="#" class="link-text">Terms & Conditions</a></span>
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="btn-auth">JOIN US</button>
+                    
+                    <div class="form-footer">
+                        <p>Already a member? <a href="#" class="link-text" id="showLogin">Log In</a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Calendar Modal -->
+    <div class="calendar-modal" id="calendarModal">
+        <div class="calendar-overlay" id="calendarOverlay"></div>
+        <div class="calendar-container">
+            <div class="calendar-header">
+                <h3>Select Date of Birth</h3>
+                <button class="calendar-close" id="calendarClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="calendar-body">
+                <div class="calendar-controls">
+                    <button class="calendar-nav-btn" id="prevMonth">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <div class="calendar-month-year">
+                        <button class="calendar-month-btn" id="calendarMonth">August</button>
+                        <button class="calendar-year-btn" id="calendarYear">2026</button>
+                    </div>
+                    <button class="calendar-nav-btn" id="nextMonth">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+                
+                <!-- Month Picker -->
+                <div class="month-picker hidden" id="monthPicker">
+                    <div class="month-picker-grid">
+                        <button class="month-picker-item" data-month="0">Jan</button>
+                        <button class="month-picker-item" data-month="1">Feb</button>
+                        <button class="month-picker-item" data-month="2">Mar</button>
+                        <button class="month-picker-item" data-month="3">Apr</button>
+                        <button class="month-picker-item" data-month="4">May</button>
+                        <button class="month-picker-item" data-month="5">Jun</button>
+                        <button class="month-picker-item" data-month="6">Jul</button>
+                        <button class="month-picker-item" data-month="7">Aug</button>
+                        <button class="month-picker-item" data-month="8">Sep</button>
+                        <button class="month-picker-item" data-month="9">Oct</button>
+                        <button class="month-picker-item" data-month="10">Nov</button>
+                        <button class="month-picker-item" data-month="11">Dec</button>
+                    </div>
+                </div>
+                
+                <!-- Year Picker -->
+                <div class="year-picker hidden" id="yearPicker">
+                    <div class="year-picker-header">
+                        <span class="year-range" id="yearRange">2020 - 2031</span>
+                    </div>
+                    <div class="year-picker-grid" id="yearPickerGrid">
+                        <!-- Years will be generated by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="calendar-weekdays">
+                    <div class="calendar-weekday">SU</div>
+                    <div class="calendar-weekday">MO</div>
+                    <div class="calendar-weekday">TU</div>
+                    <div class="calendar-weekday">WE</div>
+                    <div class="calendar-weekday">TH</div>
+                    <div class="calendar-weekday">FR</div>
+                    <div class="calendar-weekday">SA</div>
+                </div>
+                <div class="calendar-days" id="calendarDays">
+                    <!-- Days will be generated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/config/runtime-config.js"></script>
+    <script type="module" src="/assets/js/main.js"></script>
+</body>
+
+</html>
